@@ -67,7 +67,7 @@ func (c CollectorOptions) CheckAdminEndpoint() error {
 }
 
 func (c CollectorOptions) CheckEndpoint() error {
-	cli := provider.NewProvider(c.APIEndpoint)
+	cli := provider.NewProvider(c.Endpoint())
 	_, err := cli.GetCurrentMiniEpoch()
 	return err
 }

@@ -111,9 +111,9 @@ func (s *scheduledCollector) GetStatics() {
 	s.InstanceID = getMetadata("instance-id")
 	s.InstanceType = getMetadata("instance-type")
 
-	if s.option.IsSameNS {
-		s.Version = getExecOutput("zilliqa", "-v")
-	}
+	//if s.option.IsSameNS {
+	//	s.Version = getExecOutput("zilliqa", "-v")
+	//}
 }
 
 func (s *scheduledCollector) GetUDContractStateSizeRecords() (int, int, error) {

@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 	"sync"
+	"time"
 )
 
 // collect instant values
@@ -119,6 +121,7 @@ func (c *instantCollector) Collect(ch chan<- prometheus.Metric) {
 		cli := c.option.GetClient()
 		wg.Add(1)
 		go func() {
+			log.Debug("start getting BlockchainInfo")
 			defer wg.Done()
 			resp, err := cli.GetBlockchainInfo()
 			if err != nil {
@@ -129,13 +132,17 @@ func (c *instantCollector) Collect(ch chan<- prometheus.Metric) {
 			if err != nil {
 				log.WithError(err).Error("fail to parse block chain info")
 			}
-			ch <- prometheus.MustNewConstMetric(c.epoch,  prometheus.GaugeValue, float64(info.CurrentMiniEpoch))
-			ch <- prometheus.MustNewConstMetric(c.dsEpoch,  prometheus.GaugeValue, float64(info.CurrentDSEpoch))
+			epoch, _ := strconv.Atoi(info.CurrentMiniEpoch)
+			ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, float64(epoch))
+			dsEpoch, _ := strconv.Atoi(info.CurrentDSEpoch)
+			ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, float64(dsEpoch))
 			//ch <- prometheus.MustNewConstMetric(c.difficulty,  prometheus.GaugeValue, float64(info.))
+			log.Debug("exit getting BlockchainInfo")
 		}()
 
 		wg.Add(1)
 		go func() {
+			log.Debug("start getting GetPrevDifficulty")
 			defer wg.Done()
 			resp, err := cli.GetPrevDifficulty()
 			if err != nil {
@@ -145,11 +152,13 @@ func (c *instantCollector) Collect(ch chan<- prometheus.Metric) {
 			if err != nil {
 				log.WithError(err).Error("fail to parse block chain prev difficulty")
 			}
-			ch <- prometheus.MustNewConstMetric(c.difficulty,  prometheus.GaugeValue, difficulty)
+			ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, difficulty)
+			log.Debug("exit getting GetPrevDifficulty")
 		}()
 
 		wg.Add(1)
 		go func() {
+			log.Debug("start getting GetPrevDSDifficulty")
 			defer wg.Done()
 			resp, err := cli.GetPrevDSDifficulty()
 			if err != nil {
@@ -159,28 +168,34 @@ func (c *instantCollector) Collect(ch chan<- prometheus.Metric) {
 			if err != nil {
 				log.WithError(err).Error("fail to parse block chain prev DS difficulty")
 			}
-			ch <- prometheus.MustNewConstMetric(c.dsDifficulty,  prometheus.GaugeValue, dsDifficulty)
+			ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, dsDifficulty)
+			log.Debug("exit getting GetPrevDSDifficulty")
 		}()
 
 		wg.Add(1)
 		go func() {
+			log.Debug("start getting GetNetworkId")
 			defer wg.Done()
 			resp, err := cli.GetNetworkId()
 			if err != nil {
 				log.WithError(err).Error("fail to get network id")
 			}
-			netID, err := resp.GetFloat()
+			netID, err := resp.GetInt()
 			if err != nil {
 				log.WithError(err).Error("fail to parse network id")
 			}
-			ch <- prometheus.MustNewConstMetric(c.networkID,  prometheus.GaugeValue, netID)
+			ch <- prometheus.MustNewConstMetric(c.networkID, prometheus.GaugeValue, float64(netID))
+			log.Debug("exit getting GetNetworkId")
 		}()
 	}
 
-	if c.option.CheckAdminEndpoint() == nil {
-		//ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, 0)
-		//ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, 0)
+	//if c.option.CheckAdminEndpoint() == nil {
+	//	//ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, 0)
+	//	//ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, 0)
+	//}
+	if hasAPI {
 	}
-	if hasAPI {}
-	wg.Wait()
+	//wg.Wait()
+	time.Sleep(3 * time.Second)
+	log.Debug("exit instant collector")
 }
