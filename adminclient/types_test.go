@@ -1,4 +1,4 @@
-package nodemanage
+package adminclient
 
 import (
 	"encoding/json"

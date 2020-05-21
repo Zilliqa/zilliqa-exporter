@@ -1,4 +1,4 @@
-package nodemanage
+package adminclient
 
 import (
 	"encoding/json"
@@ -89,7 +89,7 @@ type CommonResponse struct {
 
 func (r *CommonResponse) Error() error {
 	if r.Err == nil {
-		return error(nil)
+		return nil
 	}
 	return r.Err
 }
@@ -105,7 +105,7 @@ type NumResponse struct {
 
 func (r *NumResponse) Error() error {
 	if r.Err == nil { // golang sucks
-		return error(nil)
+		return nil
 	}
 	return r.Err
 }

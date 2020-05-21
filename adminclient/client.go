@@ -1,4 +1,4 @@
-package nodemanage
+package adminclient
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ type Client struct {
 	timeout time.Duration
 }
 
-func NewClient(addr string, timeout time.Duration) *Client {
+func New(addr string, timeout time.Duration) *Client {
 	return &Client{address: addr, timeout: timeout}
 }
 
@@ -46,7 +46,7 @@ func (m *Client) getPayload(rq ...Request) []byte {
 	if len(rq) == 0 {
 		panic("empty requests")
 	}
-	requests := make([]map[string]interface{}, 16)
+	requests := make([]map[string]interface{}, 0)
 	for _, r := range rq {
 		params := r.params
 		if r.params == nil || len(r.params) == 0 {

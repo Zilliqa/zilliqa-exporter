@@ -1,4 +1,4 @@
-package nodemanage
+package adminclient
 
 import (
 	"net"
@@ -43,7 +43,7 @@ func TestClient(t *testing.T) {
 
 	addr, err := testServer([]byte(`{"id":"1","jsonrpc":"2.0","result":"1934"}`))
 	assert.NoError(err)
-	cli := NewClient(addr.String(), 10*time.Second)
+	cli := New(addr.String(), 10*time.Second)
 	resp, err = cli.Call(NewRequest(GetCurrentDSEpoch))
 	assert.NoError(err)
 	t.Log(nil == error(nil), error(nil) == resp.Error(), reflect.TypeOf(resp.Error()))
@@ -53,7 +53,7 @@ func TestClient(t *testing.T) {
 
 	addr, err = testServer([]byte(`[{"id":"1","jsonrpc":"2.0","result":"1934"},{"id":"1","jsonrpc":"2.0","result":"1935"}]`))
 	assert.NoError(err)
-	cli = NewClient(addr.String(), 10*time.Second)
+	cli = New(addr.String(), 10*time.Second)
 	resps, err = cli.CallBatch(NewRequest(GetCurrentDSEpoch), NewRequest(GetCurrentMiniEpoch))
 	assert.NoError(err)
 	t.Log(nil == error(nil), error(nil) == resp.Error(), reflect.TypeOf(resp.Error()))
