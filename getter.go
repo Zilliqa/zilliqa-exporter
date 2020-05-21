@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 )
 
 func getHTTPText(url string) string {
@@ -70,7 +69,7 @@ func getZilliqaMainProcess() *process.Process {
 			continue
 		}
 		for _, conn := range connections {
-			if (conn.Type == syscall.AF_INET || conn.Type == syscall.AF_CCITT) && conn.Laddr.Port == 33133 {
+			if conn.Laddr.Port == 33133 {
 				return p
 			}
 		}
