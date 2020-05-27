@@ -168,6 +168,9 @@ func (c *PsutilCollector) Collect(ch chan<- prometheus.Metric) {
 			counts[typ] += 1
 		}
 		for ct, count := range counts {
+			if ct.Port <= 0 {
+				continue
+			}
 			ch <- prometheus.MustNewConstMetric(
 				c.connectionCount, prometheus.GaugeValue, count,
 				append([]string{strconv.Itoa(int(ct.Port)), ct.Status}, labels...)...

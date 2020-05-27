@@ -1,5 +1,7 @@
 package main
 
+import _ "github.com/joho/godotenv/autoload"
+
 import (
 	"flag"
 	"genet_exporter/logrusmiddleware"
