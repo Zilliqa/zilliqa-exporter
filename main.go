@@ -74,6 +74,7 @@ func serve(listen string) error {
 			"version='%s' date='%s' branch='%s' tag='%s' commit='%s' buildinfo='%s'",
 			version, date, branch, tag, commit, buildInfo,
 		)
+		return nil
 	}
 
 	constants := collector.GetConstants(options)
