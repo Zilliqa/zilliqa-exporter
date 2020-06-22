@@ -1,18 +1,29 @@
 package main
 
-import _ "github.com/joho/godotenv/autoload"
-
 import (
-	"flag"
+	"encoding/json"
+	"genet_exporter/collector"
 	"genet_exporter/logrusmiddleware"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
-var options CollectorOptions
+var options = &collector.Options{}
+var listen string
+
+var cmd = &cobra.Command{
+	Use:   filepath.Base(os.Args[0]),
+	Short: "zilliqa metric exporter",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return serve(listen)
+	},
+}
 
 func main() {
 	log.SetOutput(os.Stderr)
@@ -21,37 +32,38 @@ func main() {
 	if os.Getenv("DEBUG") != "" {
 		log.SetLevel(log.DebugLevel)
 	}
+	options.BindFlags(cmd.Flags())
+	cmd.Flags().StringVarP(&listen, "listen", "l", "127.0.0.1:8080", "listen address of exporter")
+	_ = cmd.Execute()
 
-	options.BindFlags(flag.CommandLine)
-	flag.Parse()
+}
 
+func serve(listen string) error {
 	//Create a new instance of the foo collector and
 	//register it with the prometheus client.
-	scheduledCollector := NewScheduledCollector(options)
-	scheduledCollector.Init(prometheus.DefaultRegisterer)
+	constants := collector.GetConstants(options)
+	constants.Register(prometheus.DefaultRegisterer)
 
-	constLabels := prometheus.Labels{
-		"type":         options.NodeType,
-		"cluster_name": scheduledCollector.ClusterName,
-		"network_name": scheduledCollector.NetworkName,
-		"pod_name":     scheduledCollector.PodName,
-		"public_ip":    scheduledCollector.PublicIP,
-		"local_ip":     scheduledCollector.LocalIP,
+	optionsJson, _ := json.Marshal(options)
+	log.WithField("options", string(optionsJson)).Debug("run with options")
+	constantJson, _ := json.Marshal(constants)
+	log.WithField("constants", string(constantJson)).Debug("got constants")
+
+	if !options.NotCollectAPI {
+		prometheus.MustRegister(collector.NewAPICollector(constants))
 	}
-
-	prometheus.MustRegister(newInstantCollector(options, constLabels))
-	if options.IsSameNS {
-		prometheus.MustRegister(NewPsutilCollector(constLabels))
+	if !options.NotCollectAdmin {
+		prometheus.MustRegister(collector.NewAdminCollector(constants))
+	}
+	if !options.NotCollectProcessInfo {
+		prometheus.MustRegister(collector.NewProcessInfoCollector(constants))
 	}
 
 	l := logrusmiddleware.Middleware{
 		Name:   "example",
 		Logger: log.StandardLogger(),
 	}
-
-	//This section will start the HTTP server and expose
-	//any metrics on the /metrics endpoint.
 	http.Handle("/metrics", l.Handler(promhttp.Handler(), "metrics"))
-	log.Info("Beginning to serve on port 0.0.0.0:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Infof("Beginning to serve on port %s", listen)
+	return http.ListenAndServe(listen, nil)
 }

@@ -3,13 +3,16 @@ package adminclient
 import (
 	"encoding/json"
 	"fmt"
+	"genet_exporter/jsonrpc"
 	"github.com/pkg/errors"
-	"math/big"
+	"strconv"
+	"strings"
 )
 
 type MethodName string
 
 // method names
+var UnknownResultType = errors.New("unknown result type")
 
 const (
 	GetCurrentMiniEpoch MethodName = "GetCurrentMiniEpoch"
@@ -17,10 +20,11 @@ const (
 	GetNodeType         MethodName = "GetNodeType"
 	GetDSCommittee      MethodName = "GetDSCommittee"
 	GetNodeState        MethodName = "GetNodeState"
-	IsTxnInMemPool      MethodName = "IsTxnInMemPool"
-	GetPrevDSDifficulty MethodName = "GetPrevDSDifficulty"
 	GetPrevDifficulty   MethodName = "GetPrevDifficulty"
+	GetPrevDSDifficulty MethodName = "GetPrevDSDifficulty"
 	GetSendSCCallsToDS  MethodName = "GetSendSCCallsToDS"
+
+	IsTxnInMemPool MethodName = "IsTxnInMemPool"
 
 	AddToBlacklistExclusion      MethodName = "AddToBlacklistExclusion"
 	RemoveFromBlacklistExclusion MethodName = "RemoveFromBlacklistExclusion"
@@ -29,143 +33,182 @@ const (
 	ToggleDisableTxns            MethodName = "ToggleDisableTxns"
 )
 
-func ResponseTypeOfMethod(method MethodName) Response {
-	switch method {
-	case GetCurrentMiniEpoch, GetCurrentDSEpoch, GetPrevDifficulty, GetPrevDSDifficulty:
-		return Response(&NumResponse{})
+func NewReq(method MethodName, params interface{}) *jsonrpc.Request {
+	return jsonrpc.NewRequest(string(method), params)
+}
+
+func NewGetCurrentMiniEpochReq() *jsonrpc.Request {
+	return NewReq(GetCurrentMiniEpoch, nil)
+}
+
+func NewGetCurrentDSEpochReq() *jsonrpc.Request {
+	return NewReq(GetCurrentDSEpoch, nil)
+}
+
+func NewGetNodeTypeReq() *jsonrpc.Request {
+	return NewReq(GetNodeType, nil)
+}
+
+func NewGetDSCommitteeReq() *jsonrpc.Request {
+	return NewReq(GetDSCommittee, nil)
+}
+
+func NewGetNodeStateReq() *jsonrpc.Request {
+	return NewReq(GetNodeState, nil)
+}
+
+func NewIsTxnInMemPoolReq(txn string) *jsonrpc.Request {
+	return NewReq(IsTxnInMemPool, []string{txn})
+}
+
+func NewGetPrevDifficultyReq() *jsonrpc.Request {
+	return NewReq(GetPrevDifficulty, nil)
+}
+
+func NewGetSendSCCallsToDSReq() *jsonrpc.Request {
+	return NewReq(GetSendSCCallsToDS, nil)
+}
+
+func NewGetPrevDSDifficultyReq() *jsonrpc.Request {
+	return NewReq(GetPrevDSDifficulty, nil)
+}
+
+func NewAddToBlacklistExclusionReq(ip string) *jsonrpc.Request {
+	return NewReq(AddToBlacklistExclusion, []string{ip})
+}
+
+func NewRemoveFromBlacklistExclusionReq(ip string) *jsonrpc.Request {
+	return NewReq(RemoveFromBlacklistExclusion, []string{ip})
+}
+
+func NewToggleSendSCCallsToDSReq() *jsonrpc.Request {
+	return NewReq(ToggleSendSCCallsToDS, nil)
+}
+
+func NewDisablePoWReq() *jsonrpc.Request {
+	return NewReq(DisablePoW, nil)
+}
+
+func NewToggleDisableTxnsReq() *jsonrpc.Request {
+	return NewReq(ToggleDisableTxns, nil)
+}
+
+type NodeTypeName int
+
+const (
+	NotInNetwork NodeTypeName = iota
+	Seed
+	Lookup
+	DSNode
+	ShardNode
+)
+
+type NodeType struct {
+	Type      NodeTypeName
+	ShardId   int
+	TillEpoch int
+}
+
+func (n NodeType) String() string {
+	switch n.Type {
+	case NotInNetwork:
+		return fmt.Sprintf("Not in network, synced till epoch %d", n.TillEpoch)
+	case Seed:
+		return "Seed"
+	case Lookup:
+		return "Lookup"
+	case DSNode:
+		return "DS Node"
+	case ShardNode:
+		return fmt.Sprintf("Shard Node of shard %d", n.ShardId)
 	}
-	return Response(&CommonResponse{})
+	return "Unknown NodeType"
 }
 
-func ResponseTypeOfMethods(method ...MethodName) (responses []Response) {
-	for _, m := range method {
-		responses = append(responses, ResponseTypeOfMethod(m))
-	}
-	return
-}
-
-type Request struct {
-	method MethodName
-	params []string
-}
-
-func NewRequest(method MethodName, params ...string) Request {
-	return Request{
-		method: method,
-		params: params,
-	}
-}
-
-func ResponseTypeOfRequest(req Request) Response {
-	return ResponseTypeOfMethod(req.method)
-}
-
-func ResponseTypeOfRequests(req ...Request) (responses []Response) {
-	for _, r := range req {
-		responses = append(responses, ResponseTypeOfMethod(r.method))
-	}
-	return
-}
-
-type RPCError struct {
-	Code    int64       `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
-}
-
-func (e *RPCError) Error() string {
-	return fmt.Sprintf("code: %d %s", e.Code, e.Message)
-}
-
-type Response interface {
-	Error() error
-	Result() interface{}
-}
-
-type CommonResponse struct {
-	Err *RPCError    `json:"error,omitempty"`
-	Rst *interface{} `json:"result,omitempty"`
-}
-
-func (r *CommonResponse) Error() error {
-	if r.Err == nil {
-		return nil
-	}
-	return r.Err
-}
-
-func (r *CommonResponse) Result() interface{} {
-	return r.Rst
-}
-
-type NumResponse struct {
-	Err *RPCError  `json:"error,omitempty"`
-	Rst *big.Float `json:"result,omitempty"`
-}
-
-func (r *NumResponse) Error() error {
-	if r.Err == nil { // golang sucks
-		return nil
-	}
-	return r.Err
-}
-
-func (r *NumResponse) Result() interface{} {
-	return r.Rst
-}
-
-func (r *NumResponse) BigFloat() *big.Float {
-	return r.Rst
-}
-
-func (r *NumResponse) Float64() float64 {
-	f, _ := r.Rst.Float64()
-	return f
-}
-
-func (r *NumResponse) BigInt() *big.Int {
-	i, _ := r.Rst.Int(nil)
-	return i
-}
-
-func (r *NumResponse) Int64() int64 {
-	return r.BigInt().Int64()
-}
-
-var UnknownResultType = errors.New("unknown result type")
-
-func (r *NumResponse) UnmarshalJSON(data []byte) error {
-	r.Err = nil
-	r.Rst = &big.Float{}
-	var m map[string]json.RawMessage
-	err := json.Unmarshal(data, &m)
+func (n *NodeType) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
 	if err != nil {
 		return err
 	}
-	if e, ok := m["error"]; ok {
-		err := json.Unmarshal(e, &r.Err)
+	switch {
+	case strings.HasPrefix(s, "Not in network"):
+		split := strings.Split(s, " ")
+		epoch, err := strconv.Atoi(split[len(split)-1])
 		if err != nil {
 			return err
 		}
-	}
-	if rst, ok := m["result"]; ok {
-		var result interface{}
-		err := json.Unmarshal(rst, &result)
+		n.Type = NotInNetwork
+		n.TillEpoch = epoch
+	case strings.HasPrefix(s, "Shard Node of"):
+		split := strings.Split(s, " ")
+		num, err := strconv.Atoi(split[len(split)-1])
 		if err != nil {
 			return err
 		}
-		switch v := result.(type) {
-		case string:
-			_, _, err := r.Rst.Parse(v, 10)
-			if err != nil {
-				return err
-			}
-		case float64:
-			r.Rst.SetFloat64(v)
-		default:
-			return UnknownResultType
-		}
-
+		n.Type = ShardNode
+		n.ShardId = num
+	case s == "DS Node":
+		n.Type = DSNode
+	case s == "Lookup":
+		n.Type = Lookup
+	case s == "Seed":
+		n.Type = Seed
+	default:
+		return errors.New("parse NodeTypeName error: unknown node type " + s)
 	}
 	return nil
+}
+
+type NodeState int
+
+const (
+	POW_SUBMISSION NodeState = iota
+	DSBLOCK_CONSENSUS_PREP
+	DSBLOCK_CONSENSUS
+	MICROBLOCK_SUBMISSION
+	FINALBLOCK_CONSENSUS_PREP
+	FINALBLOCK_CONSENSUS
+	VIEWCHANGE_CONSENSUS_PREP
+	VIEWCHANGE_CONSENSUS
+	ERROR
+	SYNC
+)
+
+var StringNodeStateMap = map[string]NodeState{
+	"POW_SUBMISSION":            POW_SUBMISSION,
+	"DSBLOCK_CONSENSUS_PREP":    DSBLOCK_CONSENSUS_PREP,
+	"DSBLOCK_CONSENSUS":         DSBLOCK_CONSENSUS,
+	"MICROBLOCK_SUBMISSION":     MICROBLOCK_SUBMISSION,
+	"FINALBLOCK_CONSENSUS_PREP": FINALBLOCK_CONSENSUS_PREP,
+	"FINALBLOCK_CONSENSUS":      FINALBLOCK_CONSENSUS,
+	"VIEWCHANGE_CONSENSUS_PREP": VIEWCHANGE_CONSENSUS_PREP,
+	"VIEWCHANGE_CONSENSUS":      VIEWCHANGE_CONSENSUS,
+	"ERROR":                     ERROR,
+	"SYNC":                      SYNC,
+}
+
+var NodeStateStringMap = func(m map[string]NodeState) map[NodeState]string {
+	rt := make(map[NodeState]string)
+	for k, v := range m {
+		rt[v] = k
+	}
+	return rt
+}(StringNodeStateMap)
+
+func (n NodeState) String() string {
+	return NodeStateStringMap[n]
+}
+
+func (n *NodeState) UnmarshalJSON(data []byte) error {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+	if state, ok := StringNodeStateMap[s]; ok {
+		*n = state
+		return nil
+	}
+	return errors.New("parse NodeState error: unknown state " + s)
 }

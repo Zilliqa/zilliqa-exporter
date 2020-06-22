@@ -1,6 +1,7 @@
-package main
+package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/shirou/gopsutil/process"
 	log "github.com/sirupsen/logrus"
@@ -10,10 +11,20 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
-func getHTTPText(url string) string {
-	resp, err := http.Get(url)
+const AWSMetadataIP = "169.254.169.254"
+const AWSMetadataUrl = "http://169.254.169.254/latest/meta-data"
+
+func GetHTTPText(url string) string {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		log.WithField("url", url).WithError(err).Error("fail to build request")
+		return ""
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.WithField("url", url).WithError(err).Error("fail to get response")
 		return ""
@@ -27,11 +38,15 @@ func getHTTPText(url string) string {
 	return string(body)
 }
 
-func getMetadata(name string) string {
-	return getHTTPText(fmt.Sprintf("http://169.254.169.254/latest/meta-data/%s", name))
+func MetadataAvailable() bool {
+	return CheckTCPPortOpen(AWSMetadataIP + ":80")
 }
 
-func getEnvKeys(key ...string) (value string) {
+func GetMetadata(name string) string {
+	return GetHTTPText(fmt.Sprintf("%s/%s", AWSMetadataUrl, name))
+}
+
+func GetEnvKeys(key ...string) (value string) {
 	for _, k := range key {
 		value = os.Getenv(k)
 		if value != "" {
@@ -41,10 +56,14 @@ func getEnvKeys(key ...string) (value string) {
 	return
 }
 
-func getExecOutput(name string, args ...string) string {
-	bin, err := exec.LookPath(name)
-	if err != nil {
-		log.WithError(err).Error("fail to get exec output")
+func GetExecOutput(name string, args ...string) string {
+	var bin string
+	var err error
+	if !PathExists(name) {
+		bin, err = exec.LookPath(name)
+		if err != nil {
+			log.WithError(err).Error("fail to get exec output")
+		}
 	}
 	cmd := exec.Command(bin, args...)
 	buf := new(strings.Builder)
@@ -58,7 +77,7 @@ func getExecOutput(name string, args ...string) string {
 	return buf.String()
 }
 
-func getZilliqaMainProcess() *process.Process {
+func GetZilliqaMainProcess() *process.Process {
 	processes, err := process.Processes()
 	if err != nil {
 		log.WithError(err).Error("fail to get zilliqa main process")

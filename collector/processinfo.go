@@ -1,6 +1,7 @@
-package main
+package collector
 
 import (
+	"genet_exporter/utils"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
@@ -12,10 +13,16 @@ import (
 	"time"
 )
 
-type PsutilCollector struct {
+type ProcessInfoCollector struct {
+	options   *Options
+	constants *Constants
+
 	// os related, from psutil
-	up              *prometheus.Desc
-	syncType        *prometheus.Desc
+	processRunning *prometheus.Desc
+	syncType       *prometheus.Desc
+	nodeType       *prometheus.Desc
+	nodeIndex      *prometheus.Desc
+
 	uptime          *prometheus.Desc
 	connectionCount *prometheus.Desc
 	threadCount     *prometheus.Desc
@@ -31,14 +38,25 @@ type PsutilCollector struct {
 
 var processLabels = []string{"pid", "cwd"}
 
-func NewPsutilCollector(constLabels prometheus.Labels) *PsutilCollector {
-	return &PsutilCollector{
-		up: prometheus.NewDesc(
-			"up", "If zilliqa process is running",
+func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
+	constLabels := constants.ConstLabels()
+	return &ProcessInfoCollector{
+		options:   constants.options,
+		constants: constants,
+		processRunning: prometheus.NewDesc(
+			"zilliqa_process_running", "If zilliqa process is running",
 			processLabels, constLabels,
 		),
 		syncType: prometheus.NewDesc(
-			"synctype", "Synctype from zilliqa commandline option",
+			"synctype", "Synctype from zilliqa commandline options",
+			processLabels, constLabels,
+		),
+		nodeType: prometheus.NewDesc(
+			"nodetype", "Nodetype from zilliqa commandline options",
+			append([]string{"text"}, processLabels...), constLabels,
+		),
+		nodeIndex: prometheus.NewDesc(
+			"nodeindex", "Nodeindex from zilliqa commandline options",
 			processLabels, constLabels,
 		),
 		uptime: prometheus.NewDesc(
@@ -76,9 +94,12 @@ func NewPsutilCollector(constLabels prometheus.Labels) *PsutilCollector {
 	}
 }
 
-func (c *PsutilCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.up
+func (c *ProcessInfoCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.processRunning
 	ch <- c.syncType
+	ch <- c.nodeType
+	ch <- c.nodeIndex
+
 	ch <- c.uptime
 	ch <- c.connectionCount
 	ch <- c.threadCount
@@ -92,32 +113,11 @@ func (c *PsutilCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.storageUsed
 }
 
-func getSyncType(cmdline []string) (syncType int, err error) {
-	for i, arg := range cmdline {
-		if strings.HasPrefix(arg, "--synctype") {
-			if strings.Contains(arg, "=") {
-				splits := strings.Split(arg, "=")
-				if len(splits) < 2 {
-					if len(cmdline) < i {
-						err = errors.New("not found")
-						return
-					}
-					syncType, err = strconv.Atoi(cmdline[i+1])
-					return
-				}
-				syncType, err = strconv.Atoi(splits[1])
-				return
-			}
-		}
-	}
-	return
-}
-
-func (c *PsutilCollector) Collect(ch chan<- prometheus.Metric) {
-	process := getZilliqaMainProcess()
+func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
+	process := utils.GetZilliqaMainProcess()
 	if process == nil {
 		log.Error("no running zilliqa process found")
-		ch <- prometheus.MustNewConstMetric(c.up, prometheus.GaugeValue, 0, "0", "")
+		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, "0", "")
 		return
 	}
 	pid := process.Pid
@@ -131,12 +131,30 @@ func (c *PsutilCollector) Collect(ch chan<- prometheus.Metric) {
 	go func() {
 		defer wg.Done()
 		cmdline, _ := process.CmdlineSlice()
-		syncType, err := getSyncType(cmdline)
+		syncType, err := GetSyncTypeFromCmdline(cmdline)
 		if err != nil {
 			log.WithError(err).Error("fail to get sync type")
-			return
+		} else {
+			ch <- prometheus.MustNewConstMetric(c.syncType, prometheus.GaugeValue, float64(syncType), labels...)
 		}
-		ch <- prometheus.MustNewConstMetric(c.syncType, prometheus.GaugeValue, float64(syncType), labels...)
+
+		nt := GetNodeTypeFromCmdline(cmdline)
+		nodeType := NodeTypeFromString(nt)
+		if nodeType == UnknownNodeType {
+			log.Errorf("fail to get node type, type %s unknown", nodeType)
+		} else {
+			ch <- prometheus.MustNewConstMetric(
+				c.nodeType, prometheus.GaugeValue, float64(nodeType),
+				append([]string{nodeType.String()}, labels...)...,
+			)
+		}
+
+		nodeIndex, err := GetNodeIndexFromCmdline(cmdline)
+		if err != nil {
+			log.WithError(err).Error("fail to get sync type")
+		} else {
+			ch <- prometheus.MustNewConstMetric(c.syncType, prometheus.GaugeValue, float64(nodeIndex), labels...)
+		}
 	}()
 
 	// uptime
@@ -200,4 +218,66 @@ func (c *PsutilCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(c.storageUsed, prometheus.GaugeValue, float64(storageStats.Used), labels...)
 	}()
 	wg.Wait()
+}
+
+//# synctype:
+//# 0(default) for no
+//# 1 for new
+//# 2 for normal
+//# 3 for ds
+//# 4 for lookup
+//# 5 for node recovery
+//# 6 for new lookup
+//# 7 for ds guard node sync
+//# 8 for offline validation of DB
+
+type SyncType int
+
+const (
+	DefaultSyncType SyncType = iota
+	NewSyncType
+	NormalSyncType
+	DSSyncType
+	LookupSyncType
+	RecoverySyncType
+	NewLookupSyncType
+	DSGuardNodeSyncSyncType
+	OfflineDBValidationSyncType
+)
+
+func GetSyncTypeFromCmdline(cmdline []string) (int, error) {
+	value := GetParamValueFromCmdline(cmdline, "--synctype")
+	if value == "" {
+		return 0, errors.New("not found")
+	}
+	return strconv.Atoi(value)
+}
+
+func GetNodeTypeFromCmdline(cmdline []string) string {
+	return GetParamValueFromCmdline(cmdline, "--nodetype")
+}
+
+func GetNodeIndexFromCmdline(cmdline []string) (int, error) {
+	value := GetParamValueFromCmdline(cmdline, "--nodeindex")
+	if value == "" {
+		return 0, errors.New("not found")
+	}
+	return strconv.Atoi(value)
+}
+
+func GetParamValueFromCmdline(cmdline []string, param string) string {
+	for i, arg := range cmdline {
+		if strings.HasPrefix(arg, param) {
+			if strings.Contains(arg, "=") {
+				splits := strings.Split(arg, "=")
+				// --opt value
+				if len(splits) < 2 {
+					return cmdline[i+1]
+				}
+				// --opt=value
+				return splits[1]
+			}
+		}
+	}
+	return ""
 }
