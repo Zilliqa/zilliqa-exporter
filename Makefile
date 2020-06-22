@@ -32,14 +32,16 @@ clean:
 	rm -rf ./dist
 
 
-local: generate-all
+local:
 	mkdir -p ${DIST}
 	go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME} ${MODULE_NAME}
 
-linux-amd64: generate-all
+linux-amd64:
 	mkdir -p ${DIST}
 	GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-linux-adm64 ${MODULE_NAME}
 
-darwin-amd64: generate-all
+darwin-amd64:
 	mkdir -p ${DIST}
 	GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-adm64 ${MODULE_NAME}
+
+release: linux-amd64 darwin-amd64

@@ -3,8 +3,8 @@ package adminclient
 import (
 	"encoding/json"
 	"fmt"
-	"genet_exporter/jsonrpc"
 	"github.com/pkg/errors"
+	"github.com/zilliqa/genet_exporter/jsonrpc"
 	"strconv"
 	"strings"
 )

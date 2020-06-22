@@ -1,10 +1,10 @@
 package collector
 
 import (
-	"genet_exporter/adminclient"
-	"genet_exporter/jsonrpc"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/zilliqa/genet_exporter/adminclient"
+	"github.com/zilliqa/genet_exporter/jsonrpc"
 )
 
 // collect instant values

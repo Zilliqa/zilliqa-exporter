@@ -1,9 +1,9 @@
 package collector
 
 import (
-	"genet_exporter/utils"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/zilliqa/genet_exporter/utils"
 	"strings"
 )
 

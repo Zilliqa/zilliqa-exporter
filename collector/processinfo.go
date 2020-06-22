@@ -1,10 +1,10 @@
 package collector
 
 import (
-	"genet_exporter/utils"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/zilliqa/genet_exporter/utils"
 
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -191,7 +191,7 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 			}
 			ch <- prometheus.MustNewConstMetric(
 				c.connectionCount, prometheus.GaugeValue, count,
-				append([]string{strconv.Itoa(int(ct.Port)), ct.Status}, labels...)...
+				append([]string{strconv.Itoa(int(ct.Port)), ct.Status}, labels...)...,
 			)
 		}
 	}()
