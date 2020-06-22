@@ -6,8 +6,8 @@ DATE=$(shell date +%s)
 BUILD_INFO=$(shell go version)
 
 DIST="./dist"
-BIN_NAME="genet-exporter"
-MODULE_NAME="github.com/zilliqa/genet_exporter"
+BIN_NAME="zilliqa-exporter"
+MODULE_NAME="github.com/zilliqa/zilliqa-exporter"
 
 ifdef TAG
 	IMAGE="zilliqa/zilliqa:${TAG}"

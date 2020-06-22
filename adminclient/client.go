@@ -2,7 +2,7 @@ package adminclient
 
 import (
 	"context"
-	"github.com/zilliqa/genet_exporter/jsonrpc"
+	"github.com/zilliqa/zilliqa-exporter/jsonrpc"
 	"time"
 )
 

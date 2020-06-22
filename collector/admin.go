@@ -3,8 +3,8 @@ package collector
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
-	"github.com/zilliqa/genet_exporter/adminclient"
-	"github.com/zilliqa/genet_exporter/jsonrpc"
+	"github.com/zilliqa/zilliqa-exporter/adminclient"
+	"github.com/zilliqa/zilliqa-exporter/jsonrpc"
 )
 
 // collect instant values

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/zilliqa/genet_exporter/jsonrpc"
+	"github.com/zilliqa/zilliqa-exporter/jsonrpc"
 	"strconv"
 	"strings"
 )

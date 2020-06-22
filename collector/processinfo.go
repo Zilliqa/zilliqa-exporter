@@ -5,7 +5,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
 	log "github.com/sirupsen/logrus"
-	"github.com/zilliqa/genet_exporter/utils"
+	"github.com/zilliqa/zilliqa-exporter/utils"
 	"strconv"
 	"strings"
 	"sync"

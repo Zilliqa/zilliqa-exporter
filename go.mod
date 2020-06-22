@@ -1,4 +1,4 @@
-module github.com/zilliqa/genet_exporter
+module github.com/zilliqa/zilliqa-exporter
 
 go 1.13
 

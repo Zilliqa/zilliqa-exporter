@@ -3,7 +3,7 @@ package collector
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
-	"github.com/zilliqa/genet_exporter/utils"
+	"github.com/zilliqa/zilliqa-exporter/utils"
 	"strings"
 )
 
