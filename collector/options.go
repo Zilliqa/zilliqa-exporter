@@ -116,24 +116,24 @@ func (c *Options) ZilliqaBinPath() string {
 }
 
 func (c Options) APIEndpoint() string {
-	if c.apiEndpoint == "" && utils.CheckTCPPortOpen(DefaultAPIEndpoint) {
+	if c.apiEndpoint == "" && utils.CheckTCPPortOpen(DefaultAPIEndpoint) == nil {
 		c.apiEndpoint = DefaultAPIEndpoint
 	}
-	if !strings.HasPrefix(c.apiEndpoint, "http://") {
+	if !strings.HasPrefix(c.apiEndpoint, "http://") && !strings.HasPrefix(c.apiEndpoint, "https://") {
 		return fmt.Sprintf("http://%s", c.apiEndpoint)
 	}
 	return c.apiEndpoint
 }
 
 func (c Options) AdminEndpoint() string {
-	if c.adminEndpoint == "" && utils.CheckTCPPortOpen(DefaultAdminEndpoint) {
+	if c.adminEndpoint == "" && utils.CheckTCPPortOpen(DefaultAdminEndpoint) == nil {
 		c.adminEndpoint = DefaultAdminEndpoint
 	}
 	return c.adminEndpoint
 }
 
 func (c Options) WebsocketEndpoint() string {
-	if c.websocketEndpoint == "" && utils.CheckTCPPortOpen(DefaultWebsocketEndpoint) {
+	if c.websocketEndpoint == "" && utils.CheckTCPPortOpen(DefaultWebsocketEndpoint) == nil {
 		c.websocketEndpoint = DefaultWebsocketEndpoint
 	}
 	return c.websocketEndpoint
@@ -156,8 +156,8 @@ func (c Options) CheckGetAPIClient() (*provider.Provider, error) {
 			host = host + ":443"
 		}
 	}
-	if !utils.CheckTCPPortOpen(host) {
-		return nil, errors.New("cannot connect to API server")
+	if err := utils.CheckTCPPortOpen(host); err != nil {
+		return nil, errors.Wrap(err, "cannot connect to api server")
 	}
 	cli := c.GetAPIClient()
 	_, err = cli.GetCurrentMiniEpoch()
@@ -169,8 +169,8 @@ func (c Options) CheckGetAdminClient() (*adminclient.Client, error) {
 	if ep == "" {
 		return nil, errors.New("admin endpoint not set")
 	}
-	if !utils.CheckTCPPortOpen(ep) {
-		return nil, errors.New("cannot connect to admin server")
+	if err := utils.CheckTCPPortOpen(ep); err != nil {
+		return nil, errors.Wrap(err, "cannot connect to admin server")
 	}
 	cli := c.GetAdminClient()
 	_, err := cli.GetCurrentMiniEpoch()

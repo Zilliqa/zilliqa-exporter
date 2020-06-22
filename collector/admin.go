@@ -97,7 +97,7 @@ func (c *AdminCollector) Describe(ch chan<- *prometheus.Desc) {
 		ch <- c.difficulty
 		ch <- c.dsDifficulty
 		ch <- c.shardId
-		ch <- c.nodeState
+		//ch <- c.nodeState
 	}
 }
 

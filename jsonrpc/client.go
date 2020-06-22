@@ -94,8 +94,10 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 
 	doneCh := make(chan struct{})
 	errCh := make(chan error)
+	defer close(errCh)
 	go func() {
 		_, err = io.Copy(buf, conn)
+		log.Debug("reading response")
 		if err != nil {
 			errCh <- errors.Wrap(err, "fail to get response")
 		}
@@ -103,8 +105,10 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 	}()
 	select {
 	case err := <-errCh:
+		log.WithField("addr", c.addr).WithError(err).Error("connection Error")
 		return nil, err
 	case <-ctx.Done():
+		log.WithField("addr", c.addr).Error("connection timeout or canceled")
 		return nil, ctx.Err()
 	case <-doneCh:
 	}
@@ -116,7 +120,7 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 
 func (*TCPClient) getBatchPayload(rq ...*Request) ([]byte, error) {
 	if len(rq) == 0 {
-		panic("empty requests")
+		return nil, errors.New("empty requests")
 	}
 	return json.Marshal(rq)
 }

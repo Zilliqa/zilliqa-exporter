@@ -1,19 +1,20 @@
 package utils
 
 import (
+	"github.com/pkg/errors"
 	"net"
 	"time"
 )
 
-func CheckTCPPortOpen(addr string) bool {
-	timeout := 500 * time.Millisecond
+func CheckTCPPortOpen(addr string) error {
+	timeout := 2500 * time.Millisecond
 	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
-		return false
+		return errors.Wrap(err, "check tcp port fail")
 	}
 	if conn != nil {
 		defer conn.Close()
-		return true
+		return nil
 	}
-	return false
+	return errors.New("check tcp port fail: connection & error both nil")
 }
