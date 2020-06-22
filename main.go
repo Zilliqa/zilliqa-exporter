@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 var options = &collector.Options{}
@@ -70,9 +71,15 @@ func main() {
 
 func serve(listen string) error {
 	if printVersion {
+		var isoDate string
+		u, err := strconv.ParseInt(version, 10, 64)
+		if err != nil {
+			isoDate = date
+		}
+		isoDate = time.Unix(u, 0).Format("2006-01-02T15:04:05-07") // iso8601
 		fmt.Printf(
-			"version='%s' date='%s' branch='%s' tag='%s' commit='%s' buildinfo='%s'",
-			version, date, branch, tag, commit, buildInfo,
+			"Version(%s) Date(%s) Branch(%s) Tag(%s) Commit(%s) BuildInfo(%s)\n",
+			version, isoDate, branch, tag, commit, buildInfo,
 		)
 		return nil
 	}
