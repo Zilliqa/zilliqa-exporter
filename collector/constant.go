@@ -37,7 +37,7 @@ type Constants struct {
 	Commit  string
 
 	// Desc
-	NodeInfo prometheus.Gauge
+	nodeInfo prometheus.Gauge
 }
 
 func GetConstants(option *Options) *Constants {
@@ -74,7 +74,7 @@ func (c *Constants) Init() {
 
 	if bin := c.options.ZilliqaBinPath(); bin != "" {
 		c.BinPath = bin
-		c.Version = utils.GetExecOutput(bin, "-v")
+		c.Version = strings.TrimSpace(utils.GetExecOutput(bin, "-v"))
 	}
 }
 
@@ -91,7 +91,7 @@ func (c *Constants) ConstLabels() prometheus.Labels {
 }
 
 func (c *Constants) Register(registerer prometheus.Registerer) {
-	c.NodeInfo = prometheus.NewGauge(prometheus.GaugeOpts{
+	c.nodeInfo = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "node_info",
 		Help: "Node Information of zilliqa and host environment",
 		ConstLabels: prometheus.Labels{
@@ -104,8 +104,8 @@ func (c *Constants) Register(registerer prometheus.Registerer) {
 			"zilliqa_bin_path": c.BinPath, "zilliqa_version": c.Version,
 		},
 	})
-	c.NodeInfo.Set(1)
-	registerer.MustRegister(c.NodeInfo)
+	c.nodeInfo.Set(1)
+	registerer.MustRegister(c.nodeInfo)
 }
 
 func (c *Constants) DetectNodeType() {
@@ -119,7 +119,14 @@ func (c *Constants) DetectNodeType() {
 			}
 		}
 	} else if p := utils.GetZilliqaMainProcess(); p != nil {
-		cmdline, err := p.CmdlineSlice()
+		var cmdline []string
+		var err error
+		pd := utils.GetZilliqadProcess()
+		if pd != nil {
+			cmdline, err = pd.CmdlineSlice()
+		} else {
+			cmdline, err = p.CmdlineSlice()
+		}
 		if err == nil {
 			return
 		}

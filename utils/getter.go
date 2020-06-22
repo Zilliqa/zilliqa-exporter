@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -59,6 +60,11 @@ func GetEnvKeys(key ...string) (value string) {
 func GetExecOutput(name string, args ...string) string {
 	var bin string
 	var err error
+	bin = name
+	if name == "" {
+		log.Error("GetExecOutput: executable name should not be empty")
+		return ""
+	}
 	if !PathExists(name) {
 		bin, err = exec.LookPath(name)
 		if err != nil {
@@ -66,13 +72,17 @@ func GetExecOutput(name string, args ...string) string {
 		}
 	}
 	cmd := exec.Command(bin, args...)
+	log.Debugf("exec cmd: %s %s", bin, strings.Join(args, " "))
 	buf := new(strings.Builder)
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		log.WithError(err).Error("fail to get process stdout pipe")
+	}
 	err = cmd.Start()
 	if err != nil {
 		log.WithError(err).Error("fail to get exec output")
 	}
-	out, _ := cmd.StdoutPipe()
-	_, _ = io.Copy(buf, out)
+	_, err = io.Copy(buf, out)
 	_ = cmd.Wait()
 	return buf.String()
 }
@@ -81,6 +91,7 @@ func GetZilliqaMainProcess() *process.Process {
 	processes, err := process.Processes()
 	if err != nil {
 		log.WithError(err).Error("fail to get zilliqa main process")
+		return nil
 	}
 	for _, p := range processes {
 		connections, err := p.Connections()
@@ -91,6 +102,25 @@ func GetZilliqaMainProcess() *process.Process {
 			if conn.Laddr.Port == 33133 {
 				return p
 			}
+		}
+	}
+	return nil
+}
+
+func GetZilliqadProcess() *process.Process {
+	processes, err := process.Processes()
+	if err != nil {
+		log.WithError(err).Error("fail to get zilliqad main process")
+		return nil
+	}
+	for _, proc := range processes {
+		name, err := proc.Name()
+		if err != nil {
+			log.WithError(err).Error("fail to get zilliqad main process")
+			return nil
+		}
+		if filepath.Base(name) == "zilliqad" {
+			return proc
 		}
 	}
 	return nil

@@ -58,7 +58,7 @@ func initlog() {
 }
 
 func main() {
-	cmd.SilenceErrors = true
+	cmd.SilenceErrors = false
 	cmd.SilenceUsage = true
 	options.BindFlags(cmd.Flags())
 	cmd.Flags().StringVarP(&listen, "listen", "l", "127.0.0.1:8080", "listen address of exporter")
@@ -87,10 +87,11 @@ func serve(listen string) error {
 	constants := collector.GetConstants(options)
 	constants.Register(prometheus.DefaultRegisterer)
 
-	optionsJson, _ := json.Marshal(options)
-	log.WithField("options", string(optionsJson)).Debug("run with options")
+	log.WithFields(options.ToMap()).Info("run with options")
 	constantJson, _ := json.Marshal(constants)
-	log.WithField("constants", string(constantJson)).Debug("got constants")
+	var constantsMap map[string]interface{}
+	_ = json.Unmarshal(constantJson, &constantsMap)
+	log.WithFields(constantsMap).Info("got constants")
 
 	if !options.NotCollectAPI {
 		prometheus.MustRegister(collector.NewAPICollector(constants))

@@ -9,6 +9,12 @@ DIST="./dist"
 BIN_NAME="genet-exporter"
 MODULE_NAME="github.com/zilliqa/genet_exporter"
 
+ifdef TAG
+	IMAGE="zilliqa/zilliqa:${TAG}"
+else
+	IMAGE="zilliqa/zilliqa:${VERSION}-${COMMIT}"
+endif
+
 BUILD_FLAGS=-v -ldflags '-s -w \
 	-X "main.version=${VERSION}" \
 	-X "main.commit=${COMMIT}" \
@@ -17,7 +23,13 @@ BUILD_FLAGS=-v -ldflags '-s -w \
 	-X "main.date=${DATE}" \
 	-X "main.buildInfo=${BUILD_INFO}"'
 
-DOCKER_BUILD_ARG=--build-arg COMMIT=${COMMIT} --build-arg DATE=${DATE} --build-arg VERSION=${VERSION}
+#DOCKER_BUILD_ARG=\
+#	--build-arg VERSION="${VERSION}" \
+#	--build-arg COMMIT="${COMMIT}" \
+#	--build-arg BRANCH="${BRANCH}" \
+#	--build-arg TAG="${TAG}" \
+#	--build-arg DATE="${DATE}" \
+#	--build-arg BUILD_INFO="${BUILD_INFO}"
 
 info:
 	@echo 'Version: ' ${VERSION}
@@ -34,14 +46,18 @@ clean:
 
 local:
 	mkdir -p ${DIST}
-	go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME} ${MODULE_NAME}
+	GO111MODULE="on" go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME} ${MODULE_NAME}
 
 linux-amd64:
 	mkdir -p ${DIST}
-	GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-linux-adm64 ${MODULE_NAME}
+	GO111MODULE="on" GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-linux-adm64 ${MODULE_NAME}
 
 darwin-amd64:
 	mkdir -p ${DIST}
-	GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-adm64 ${MODULE_NAME}
+	GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-adm64 ${MODULE_NAME}
 
 release: linux-amd64 darwin-amd64
+
+image:
+	#docker build -t ${IMAGE} . ${DOCKER_BUILD_ARG}
+	docker build -t ${IMAGE} .

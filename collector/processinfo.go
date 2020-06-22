@@ -4,13 +4,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
-	"github.com/zilliqa/genet_exporter/utils"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/zilliqa/genet_exporter/utils"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 type ProcessInfoCollector struct {
@@ -115,6 +113,7 @@ func (c *ProcessInfoCollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 	process := utils.GetZilliqaMainProcess()
+	processd := utils.GetZilliqadProcess()
 	if process == nil {
 		log.Error("no running zilliqa process found")
 		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, "0", "")
@@ -131,10 +130,16 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 	go func() {
 		defer wg.Done()
 		cmdline, _ := process.CmdlineSlice()
+		if processd != nil {
+			log.Debug("use zilliqad's cmdline for process info")
+			cmdline, _ = processd.CmdlineSlice()
+		}
+		log.WithField("cmdline", cmdline).Debug("found cmdline of zilliqa process")
 		syncType, err := GetSyncTypeFromCmdline(cmdline)
 		if err != nil {
 			log.WithError(err).Error("fail to get sync type")
 		} else {
+			log.WithField("syncType", syncType).Debug("found sync type")
 			ch <- prometheus.MustNewConstMetric(c.syncType, prometheus.GaugeValue, float64(syncType), labels...)
 		}
 
@@ -143,6 +148,7 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 		if nodeType == UnknownNodeType {
 			log.Errorf("fail to get node type, type %s unknown", nodeType)
 		} else {
+			log.WithField("nodeType", nodeType).Debug("found node type")
 			ch <- prometheus.MustNewConstMetric(
 				c.nodeType, prometheus.GaugeValue, float64(nodeType),
 				append([]string{nodeType.String()}, labels...)...,
@@ -151,9 +157,10 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 
 		nodeIndex, err := GetNodeIndexFromCmdline(cmdline)
 		if err != nil {
-			log.WithError(err).Error("fail to get sync type")
+			log.WithError(err).Error("fail to get node index")
 		} else {
-			ch <- prometheus.MustNewConstMetric(c.syncType, prometheus.GaugeValue, float64(nodeIndex), labels...)
+			log.WithField("nodeIndex", nodeIndex).Debug("found node index")
+			ch <- prometheus.MustNewConstMetric(c.nodeIndex, prometheus.GaugeValue, float64(nodeIndex), labels...)
 		}
 	}()
 
@@ -161,10 +168,11 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		// milliseconds since the epoch, in UTC
 		created, _ := process.CreateTime()
-		nanoNow := time.Now().UnixNano()
-		uptime := time.Duration(nanoNow)*time.Nanosecond - time.Duration(created)*time.Millisecond
-		ch <- prometheus.MustNewConstMetric(c.uptime, prometheus.GaugeValue, float64(uptime), labels...)
+		//nanoNow := time.Now().UnixNano()
+		//uptime := time.Duration(nanoNow)*time.Nanosecond - time.Duration(created)*time.Millisecond
+		ch <- prometheus.MustNewConstMetric(c.uptime, prometheus.GaugeValue, float64(created), labels...)
 	}()
 
 	// connections
@@ -277,6 +285,7 @@ func GetParamValueFromCmdline(cmdline []string, param string) string {
 				// --opt=value
 				return splits[1]
 			}
+			return cmdline[i+1]
 		}
 	}
 	return ""

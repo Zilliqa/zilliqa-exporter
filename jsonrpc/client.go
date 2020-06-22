@@ -94,7 +94,6 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 
 	doneCh := make(chan struct{})
 	errCh := make(chan error)
-	defer close(errCh)
 	go func() {
 		_, err = io.Copy(buf, conn)
 		log.Debug("reading response")
@@ -102,6 +101,7 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 			errCh <- errors.Wrap(err, "fail to get response")
 		}
 		close(doneCh)
+		close(errCh)
 	}()
 	select {
 	case err := <-errCh:
