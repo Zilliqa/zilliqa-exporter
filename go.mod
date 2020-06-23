@@ -7,6 +7,7 @@ require (
 	github.com/Zilliqa/gozilliqa-sdk v1.0.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/meatballhat/negroni-logrus v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.4.0
 	github.com/shirou/gopsutil v2.20.4+incompatible
@@ -14,5 +15,6 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.5.1
+	github.com/urfave/negroni v1.0.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

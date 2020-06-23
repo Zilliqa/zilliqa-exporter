@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/meatballhat/negroni-logrus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/urfave/negroni"
 	"github.com/zilliqa/zilliqa-exporter/collector"
-	"github.com/zilliqa/zilliqa-exporter/logrusmiddleware"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -103,11 +104,23 @@ func serve(listen string) error {
 		prometheus.MustRegister(collector.NewProcessInfoCollector(constants))
 	}
 
-	l := logrusmiddleware.Middleware{
-		Name:   "example",
-		Logger: log.StandardLogger(),
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/panic", func(w http.ResponseWriter, req *http.Request) {
+		panic("panic test")
+	})
+	n := negroni.New()
+	recovery := &negroni.Recovery{
+		Logger:     log.StandardLogger(),
+		PrintStack: log.GetLevel() >= log.DebugLevel,
+		StackAll:   false,
+		StackSize:  1024 * 8,
+		Formatter:  &negroni.HTMLPanicFormatter{},
 	}
-	http.Handle("/metrics", l.Handler(promhttp.Handler(), "metrics"))
+	n.Use(negronilogrus.NewMiddlewareFromLogger(log.StandardLogger(), "req"))
+	n.Use(recovery)
+	n.UseHandler(mux)
+
 	log.Infof("Beginning to serve on port %s", listen)
-	return http.ListenAndServe(listen, nil)
+	return http.ListenAndServe(listen, n)
 }
