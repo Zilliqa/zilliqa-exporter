@@ -43,6 +43,8 @@ info:
 clean:
 	rm -rf ./dist
 
+test:
+	go test -v ./...
 
 local:
 	mkdir -p ${DIST}

@@ -14,14 +14,13 @@ func TestCheckEndpoint(t *testing.T) {
 		NotCollectWebsocket:   false,
 		NotCollectProcessInfo: false,
 		zilliqaBin:            "",
-		apiEndpoint:           "127.0.0.1:4201",
+		apiEndpoint:           "https://api.zilliqa.com",
 		adminEndpoint:         "127.0.0.1:4301",
 		websocketEndpoint:     "127.0.0.1:4401",
 		nodeType:              "lookup",
 	}
 
-	cli, err := options.CheckGetAdminClient()
-	t.Log(err)
+	cli, err := options.CheckGetAPIClient()
 	assert.NoError(err)
 	assert.NotNil(cli)
 }
