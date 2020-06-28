@@ -73,11 +73,12 @@ func main() {
 func serve(listen string) error {
 	if printVersion {
 		var isoDate string
-		u, err := strconv.ParseInt(version, 10, 64)
+		u, err := strconv.ParseInt(date, 10, 64)
 		if err != nil {
 			isoDate = date
+		} else {
+			isoDate = time.Unix(u, 0).Format("2006-01-02T15:04:05-07") // iso8601
 		}
-		isoDate = time.Unix(u, 0).Format("2006-01-02T15:04:05-07") // iso8601
 		fmt.Printf(
 			"Version(%s) Date(%s) Branch(%s) Tag(%s) Commit(%s) BuildInfo(%s)\n",
 			version, isoDate, branch, tag, commit, buildInfo,
