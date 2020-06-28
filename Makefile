@@ -52,13 +52,15 @@ local:
 
 linux-amd64:
 	mkdir -p ${DIST}
-	GO111MODULE="on" GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-linux-adm64 ${MODULE_NAME}
+	GO111MODULE="on" GOOS=linux GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-linux-amd64 ${MODULE_NAME}
 
 darwin-amd64:
 	mkdir -p ${DIST}
-	GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-adm64 ${MODULE_NAME}
+	GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-amd64 ${MODULE_NAME}
 
-release: linux-amd64 darwin-amd64
+release: clean linux-amd64 darwin-amd64
+	rm -f ${DIST}/checksums.txt
+	sha256sum --tag ${DIST}/* > ${DIST}/checksums.txt
 
 image:
 	#docker build -t ${IMAGE} . ${DOCKER_BUILD_ARG}
