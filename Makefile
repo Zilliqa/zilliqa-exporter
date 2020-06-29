@@ -59,8 +59,8 @@ darwin-amd64:
 	GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-amd64 ${MODULE_NAME}
 
 release: clean linux-amd64 darwin-amd64
-	rm -f ${DIST}/checksums.txt
-	sha256sum --tag ${DIST}/* > ${DIST}/checksums.txt
+	#rm -f ${DIST}/sha256sums.txt
+	cd ${DIST} && sha256sum ./* > sha256sums.txt
 
 tag-release:
 	git tag v${VERSION}
