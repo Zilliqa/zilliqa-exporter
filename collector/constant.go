@@ -50,7 +50,7 @@ func GetConstants(option *Options) *Constants {
 func (c *Constants) Init() {
 	c.PodName = utils.GetEnvKeys("POD_NAME", "Z7A_POD_NAME")
 	c.PodIP = utils.GetEnvKeys("POD_IP", "Z7A_POD_IP")
-	c.NodeName = utils.GetEnvKeys("NAMESPACE")
+	c.Namespace = utils.GetEnvKeys("NAMESPACE")
 	c.NodeName = utils.GetEnvKeys("NODE_NAME", "Z7A_NODE_NAME")
 	c.NetworkName = utils.GetEnvKeys("Z7A_TESTNET_NAME", "TESTNET_NAME", "NETWORK_NAME")
 	c.Commit = utils.GetEnvKeys("ZILLIQA_COMMIT")
@@ -80,7 +80,7 @@ func (c *Constants) Init() {
 
 func (c *Constants) ConstLabels() prometheus.Labels {
 	return prometheus.Labels{
-		"type":         string(c.options.NodeType()),
+		"type":         c.options.NodeType().String(),
 		"cluster_name": c.ClusterName,
 		"network_name": c.NetworkName,
 		"pod_name":     c.PodName,
@@ -95,7 +95,7 @@ func (c *Constants) Register(registerer prometheus.Registerer) {
 		Name: "node_info",
 		Help: "Node Information of zilliqa and host environment",
 		ConstLabels: prometheus.Labels{
-			"pod_name": c.PodName, "pod_ip": c.PodIP, "type": string(c.options.NodeType()),
+			"pod_name": c.PodName, "pod_ip": c.PodIP, "type": c.options.NodeType().String(),
 			"namespace": c.Namespace, "node_name": c.NodeName, "network_name": c.NetworkName,
 			"placement": c.Placement, "cluster_name": c.ClusterName,
 			"public_ip": c.PublicIP, "public_hostname": c.PublicHostname,

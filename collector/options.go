@@ -195,8 +195,9 @@ func (c Options) GetAdminClient() *adminclient.Client {
 
 func (c Options) IsGeneralLookup() bool {
 	var isLookup bool
+	nt := c.NodeType()
 	for _, typ := range lookUpTypes {
-		if strings.EqualFold(string(c.NodeType()), string(typ)) {
+		if nt == typ {
 			isLookup = true
 		}
 	}
