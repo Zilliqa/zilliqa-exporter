@@ -44,7 +44,7 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        draft: true
+        draft: false
         prerelease: false
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
