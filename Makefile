@@ -62,6 +62,9 @@ release: clean linux-amd64 darwin-amd64
 	rm -f ${DIST}/checksums.txt
 	sha256sum --tag ${DIST}/* > ${DIST}/checksums.txt
 
+tag-release:
+	git tag v${VERSION}
+
 image:
 	#docker build -t ${IMAGE} . ${DOCKER_BUILD_ARG}
 	docker build -t ${IMAGE} .
