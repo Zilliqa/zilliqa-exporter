@@ -91,7 +91,7 @@ func (c *Options) BindFlags(set *pflag.FlagSet) {
 	set.BoolVarP(&c.NotCollectAdmin, "not-collect-admin", "m", false, "do not collect metrics from Admin API")
 	set.BoolVarP(&c.NotCollectWebsocket, "not-collect-websocket", "w", false, "do not collect metrics from Websocket API")
 	set.BoolVarP(&c.NotCollectProcessInfo, "not-collect-process-info", "p", false, "do not collect metrics from Zilliqa Process")
-	set.DurationVarP(&c.rpcTimeout, "rpc-timeout", "t", 15*time.Second, "timeout of rpc request")
+	set.DurationVarP(&c.rpcTimeout, "rpc-timeout", "t", 10*time.Second, "timeout of rpc request")
 	set.StringVar(&c.apiEndpoint, "api", "", "zilliqa jsonrpc endpoint")
 	set.StringVar(&c.adminEndpoint, "admin", "", "zilliqa admin api endpoint")
 	set.StringVar(&c.websocketEndpoint, "ws", "", "zilliqa websocket api endpoint")

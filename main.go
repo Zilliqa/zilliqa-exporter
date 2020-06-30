@@ -62,7 +62,7 @@ func main() {
 	cmd.SilenceErrors = false
 	cmd.SilenceUsage = true
 	options.BindFlags(cmd.Flags())
-	cmd.Flags().StringVarP(&listen, "listen", "l", "127.0.0.1:8080", "listen address of exporter")
+	cmd.Flags().StringVarP(&listen, "listen", "l", "0.0.0.0:8080", "listen address of exporter")
 	cmd.Flags().StringVar(&logLevel, "log-level", "info", "log level")
 	cmd.Flags().BoolVarP(&printVersion, "version", "v", false, "print version info")
 	cobra.OnInitialize(initlog)
