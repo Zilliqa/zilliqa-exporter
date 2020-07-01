@@ -62,6 +62,9 @@ func (c *TCPClient) dialContext(ctx context.Context) (net.Conn, error) {
 			conn, err := tls.Dial("tcp", c.addr, c.tlsConfig)
 			if err != nil {
 				errCh <- err
+				if conn != nil {
+					_ = conn.Close()
+				}
 				return
 			}
 			ch <- conn
@@ -122,11 +125,21 @@ func (*TCPClient) getBatchPayload(rq ...*Request) ([]byte, error) {
 	if len(rq) == 0 {
 		return nil, errors.New("empty requests")
 	}
-	return json.Marshal(rq)
+	d, err := json.Marshal(rq)
+	if err != nil {
+		return nil, err
+	}
+	d = append(d, byte('\n'))
+	return d, nil
 }
 
 func (*TCPClient) getPayload(rq *Request) ([]byte, error) {
-	return json.Marshal(rq)
+	d, err := json.Marshal(rq)
+	if err != nil {
+		return nil, err
+	}
+	d = append(d, byte('\n'))
+	return d, nil
 }
 
 func (c *TCPClient) Call(request *Request) (*Response, error) {
