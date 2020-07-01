@@ -151,10 +151,12 @@ func (c *TCPClient) CallContext(ctx context.Context, request *Request) (*Respons
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("jsonrpc requesting with payload: %s", string(payload))
 	rawResp, err := c.getRawResp(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("jsonrpc got response: %s", string(payload))
 	return parseResponse(rawResp)
 }
 
@@ -167,9 +169,11 @@ func (c *TCPClient) CallBatchContext(ctx context.Context, requests ...*Request) 
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("jsonrpc requesting with payload: %s", string(payload))
 	rawResp, err := c.getRawResp(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("jsonrpc got response: %s", string(payload))
 	return parseBatchResponse(rawResp)
 }
