@@ -103,11 +103,7 @@ func (c *AdminCollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 	log.Debug("enter admin collector")
-	cli, err := c.options.CheckGetAdminClient()
-	if err != nil {
-		log.WithError(err).Error("fail to get admin client")
-		return
-	}
+	cli := c.options.GetAdminClient()
 	if cli == nil {
 		log.Error("API endpoint not set")
 		return

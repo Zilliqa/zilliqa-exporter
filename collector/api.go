@@ -135,14 +135,11 @@ func (c *APICollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 	if !c.options.IsGeneralLookup() {
+		log.Debug("not a lookup server, skip api server info collection")
 		return
 	}
 	log.Debug("enter api collector")
-	cli, err := c.options.CheckGetAPIClient()
-	if err != nil {
-		log.WithError(err).Error("fail to get api client")
-		return
-	}
+	cli := c.options.GetAPIClient()
 	if cli == nil {
 		log.Error("API endpoint not set")
 		return

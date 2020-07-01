@@ -31,9 +31,24 @@ var (
 	buildInfo = ""
 )
 
+func versionOutput() string {
+	var isoDate string
+	u, err := strconv.ParseInt(date, 10, 64)
+	if err != nil {
+		isoDate = date
+	} else {
+		isoDate = time.Unix(u, 0).Format("2006-01-02T15:04:05-07") // iso8601
+	}
+	return fmt.Sprintf(
+		"Version(%s) Date(%s) Branch(%s) Tag(%s) Commit(%s) BuildInfo(%s)",
+		version, isoDate, branch, tag, commit, buildInfo,
+	)
+}
+
 var cmd = &cobra.Command{
 	Use:   filepath.Base(os.Args[0]),
 	Short: "zilliqa metric exporter",
+	Long:  versionOutput(),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return serve(listen)
 	},
@@ -72,17 +87,7 @@ func main() {
 
 func serve(listen string) error {
 	if printVersion {
-		var isoDate string
-		u, err := strconv.ParseInt(date, 10, 64)
-		if err != nil {
-			isoDate = date
-		} else {
-			isoDate = time.Unix(u, 0).Format("2006-01-02T15:04:05-07") // iso8601
-		}
-		fmt.Printf(
-			"Version(%s) Date(%s) Branch(%s) Tag(%s) Commit(%s) BuildInfo(%s)\n",
-			version, isoDate, branch, tag, commit, buildInfo,
-		)
+		fmt.Println(versionOutput())
 		return nil
 	}
 
@@ -95,14 +100,20 @@ func serve(listen string) error {
 	_ = json.Unmarshal(constantJson, &constantsMap)
 	log.WithFields(constantsMap).Info("got constants")
 
-	if !options.NotCollectAPI {
+	if !options.NotCollectAPI || !options.IsGeneralLookup() {
 		prometheus.MustRegister(collector.NewAPICollector(constants))
+	} else {
+		log.Info("Not collecting info from API server")
 	}
 	if !options.NotCollectAdmin {
 		prometheus.MustRegister(collector.NewAdminCollector(constants))
+	} else {
+		log.Info("Not collecting info from Admin(status) server")
 	}
 	if !options.NotCollectProcessInfo {
 		prometheus.MustRegister(collector.NewProcessInfoCollector(constants))
+	} else {
+		log.Info("Not collecting info from Zilliqa Process")
 	}
 
 	mux := http.NewServeMux()
@@ -122,6 +133,8 @@ func serve(listen string) error {
 	n.Use(recovery)
 	n.UseHandler(mux)
 
+	log.Info("Zilliqa Exporter")
+	log.Info(versionOutput())
 	log.Infof("Beginning to serve on port %s", listen)
 	return http.ListenAndServe(listen, n)
 }
