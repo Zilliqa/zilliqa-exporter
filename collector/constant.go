@@ -40,8 +40,8 @@ type Constants struct {
 	nodeInfo prometheus.Gauge
 }
 
-func GetConstants(option *Options) *Constants {
-	c := &Constants{options: option}
+func GetConstants(options *Options) *Constants {
+	c := &Constants{options: options}
 	c.Init()
 	c.DetectNodeType()
 	return c
@@ -108,6 +108,11 @@ func (c *Constants) Register(registerer prometheus.Registerer) {
 	registerer.MustRegister(c.nodeInfo)
 }
 
+// map nodeType returned by admin client to nodeType of options
+//var adminNodeTypeNameToNodeTypeMap = map[adminclient.NodeTypeName]string {
+//	adminclient.ShardNode:
+//}
+
 func (c *Constants) DetectNodeType() {
 	if c.PodName != "" {
 		split := strings.Split(c.PodName, "-") // xxx-TYPE-INDEX (generated pod name of stateful set)
@@ -118,7 +123,8 @@ func (c *Constants) DetectNodeType() {
 				return
 			}
 		}
-	} else if p := utils.GetZilliqaMainProcess(); p != nil {
+	}
+	if p := utils.GetZilliqaMainProcess(); p != nil {
 		var cmdline []string
 		var err error
 		pd := utils.GetZilliqadProcess()
@@ -136,5 +142,15 @@ func (c *Constants) DetectNodeType() {
 			return
 		}
 	}
+	// TODO: get node type from admin api or log
+	//adminEp := c.options.AdminEndpoint()
+	//if adminEp != "" {
+	//	cli := adminclient.New(adminEp, 3*time.Second)
+	//	nt, err := cli.GetNodeType()
+	//	if err == nil{
+	//		nt.Type
+	//	}
+	//}
+
 	log.Debug("unable to auto-detect node type")
 }

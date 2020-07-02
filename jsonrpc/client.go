@@ -1,13 +1,13 @@
 package jsonrpc
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"io"
 	"net"
 	"sync/atomic"
 )
@@ -88,23 +88,30 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 		return nil, errors.Wrap(err, "fail to connect to server")
 	}
 	defer conn.Close()
-	log.WithField("addr", c.addr).WithField("payload", string(data)).Debug("sending request")
+	log.WithField("addr", c.addr).Debugf("sending request %s", string(data))
 	_, err = conn.Write(data)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to send data to server")
 	}
-	buf := new(bytes.Buffer)
-
+	//_, err = conn.Write([]byte("\n"))
+	buffer := new(bytes.Buffer)
 	doneCh := make(chan struct{})
 	errCh := make(chan error)
 	go func() {
-		_, err = io.Copy(buf, conn)
 		log.Debug("reading response")
-		if err != nil {
-			errCh <- errors.Wrap(err, "fail to get response")
+		connBuf := bufio.NewReader(conn)
+		for i := 0; i < 5; i++ {
+			buf, err := connBuf.ReadBytes('\n')
+			if len(buf) > 0 {
+				buffer.Write(buf)
+				break
+			}
+			if err != nil {
+				errCh <- errors.Wrap(err, "fail to get response")
+			}
 		}
+		log.WithField("addr", c.addr).WithField("resp", buffer.String()).Debug("got response")
 		close(doneCh)
-		close(errCh)
 	}()
 	select {
 	case err := <-errCh:
@@ -116,9 +123,9 @@ func (c *TCPClient) getRawResp(ctx context.Context, data []byte) ([]byte, error)
 	case <-doneCh:
 	}
 	<-doneCh
-	res := buf.Bytes()
-	log.WithField("addr", c.addr).WithField("resp", string(res)).Debug("got response")
-	return buf.Bytes(), nil
+	close(errCh)
+	res := buffer.Bytes()
+	return res, nil
 }
 
 func (*TCPClient) getBatchPayload(rq ...*Request) ([]byte, error) {
@@ -151,12 +158,10 @@ func (c *TCPClient) CallContext(ctx context.Context, request *Request) (*Respons
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("jsonrpc requesting with payload: %s", string(payload))
 	rawResp, err := c.getRawResp(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("jsonrpc got response: %s", string(payload))
 	return parseResponse(rawResp)
 }
 
@@ -169,11 +174,9 @@ func (c *TCPClient) CallBatchContext(ctx context.Context, requests ...*Request) 
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("jsonrpc requesting with payload: %s", string(payload))
 	rawResp, err := c.getRawResp(ctx, payload)
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("jsonrpc got response: %s", string(payload))
 	return parseBatchResponse(rawResp)
 }

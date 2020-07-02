@@ -2,8 +2,10 @@ package jsonrpc
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"math/big"
+	"reflect"
 	"strings"
 )
 
@@ -29,7 +31,7 @@ func (r Request) MarshalJSON() ([]byte, error) {
 func parseResponse(raw []byte) (*Response, error) {
 	resp := &Response{}
 	err := json.Unmarshal(raw, resp)
-	if err != nil {
+	if err == nil {
 		err = resp.check()
 	}
 	return resp, err
@@ -60,7 +62,7 @@ func parseBatchResponse(raw []byte) ([]*Response, error) {
 
 type Response struct {
 	Version string          `json:"jsonrpc,omitempty"`
-	Result  json.RawMessage `json:"error,omitempty"`
+	Result  json.RawMessage `json:"result,omitempty"`
 	Error   *RPCError       `json:"error,omitempty"`
 	Id      int64           `json:"id,omitempty"`
 }
@@ -92,26 +94,43 @@ func (r *Response) GetString() (string, error) {
 	return v, err
 }
 
-func (r *Response) GetInt() (int, error) {
-	var v int
-	err := r.GetObject(&v)
-	return v, err
+func (r *Response) GetNumber() (json.Number, error) {
+	var n json.Number
+	err := json.Unmarshal(r.Result, &n)
+	return n, err
 }
 
 func (r *Response) GetInt64() (int64, error) {
-	var v int64
-	err := r.GetObject(&v)
-	return v, err
+	n, err := r.GetNumber()
+	if err != nil {
+		return 0, err
+	}
+	return n.Int64()
 }
 
 func (r *Response) GetFloat64() (float64, error) {
-	var v float64
-	err := r.GetObject(&v)
-	return v, err
+	n, err := r.GetNumber()
+	if err != nil {
+		return 0, err
+	}
+	return n.Float64()
 }
 
 func (r *Response) GetBigFloat() (big.Float, error) {
-	var v big.Float
-	err := r.GetObject(&v)
-	return v, err
+	var i interface{}
+	var b big.Float
+	err := json.Unmarshal(r.Result, &i)
+	if err != nil {
+		return big.Float{}, err
+	}
+	switch i.(type) {
+	case string:
+		err := json.Unmarshal(r.Result, &b)
+		return b, err
+	case float64:
+		b.SetFloat64(i.(float64))
+		return b, nil
+	default:
+		return big.Float{}, errors.New(fmt.Sprintf("cannot parse %v as bigfloat", reflect.TypeOf(i)))
+	}
 }
