@@ -88,15 +88,15 @@ Get running process information
 | pid   | Process ID                |
 | cwd   | Current working directory |
 
-| Metric                  | Description                                         | unit  | Additional Labels                  |
-| :---------------------- | :-------------------------------------------------- | :---- | :--------------------------------- |
-| zilliqa_process_running | If zilliqa process is running                       | -     |                                    |
-| synctype                | Synctype from zilliqa commandline option            | -     |                                    |
-| nodetype                | Nodetype from zilliqa commandline option            | -     | text (representative of node type) |
-| nodeindex               | Nodeindex from zilliqa commandline option           | -     |                                    |
-| node_uptime             | Uptime of zilliqa node (unix timestamp)             | s     |                                    |
-| connection_count        | Network Connection count of zilliqa process         | -     | local_port, status                 |
-| thread_count            | Thread count of zilliqa process                     | -     |                                    |
-| fd_count                | Opened file descriptor count of zilliqa process     | -     |                                    |
-| storage_total           | Total capacity of zilliqa persistence storage (cwd) | bytes |                                    |
-| storage_used            | Used space of zilliqa persistence storage (cwd)     | bytes |                                    |
+| Metric                  | Description                                         | unit         | Additional Labels                  |
+| :---------------------- | :-------------------------------------------------- | :----------- | :--------------------------------- |
+| zilliqa_process_running | If zilliqa process is running                       | -            |                                    |
+| synctype                | Synctype from zilliqa commandline option            | -            |                                    |
+| nodetype                | Nodetype from zilliqa commandline option            | -            | text (representative of node type) |
+| nodeindex               | Nodeindex from zilliqa commandline option           | -            |                                    |
+| node_uptime             | Uptime of zilliqa node (unix timestamp)             | milliseconds |                                    |
+| connection_count        | Network Connection count of zilliqa process         | -            | local_port, status                 |
+| thread_count            | Thread count of zilliqa process                     | -            |                                    |
+| fd_count                | Opened file descriptor count of zilliqa process     | -            |                                    |
+| storage_total           | Total capacity of zilliqa persistence storage (cwd) | bytes        |                                    |
+| storage_used            | Used space of zilliqa persistence storage (cwd)     | bytes        |                                    |
