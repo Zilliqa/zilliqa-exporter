@@ -103,6 +103,22 @@ const (
 	ShardNode
 )
 
+func (n NodeTypeName) String() string {
+	switch n {
+	case NotInNetwork:
+		return "NotInNetwork"
+	case Seed:
+		return "Seed"
+	case Lookup:
+		return "Lookup"
+	case DSNode:
+		return "DSNode"
+	case ShardNode:
+		return "ShardNode"
+	}
+	return "Unknown NodeType"
+}
+
 type NodeType struct {
 	Type      NodeTypeName
 	ShardId   int
