@@ -45,7 +45,7 @@ func NewAPICollector(constants *Constants) *APICollector {
 		options:   constants.options,
 		constants: constants,
 		apiServerUp: prometheus.NewDesc(
-			"api_server_up", "JsonRPC server up and running",
+			"api_server_up", "JsonRPC API server up and running",
 			[]string{"endpoint"}, constLabels,
 		),
 		epoch: prometheus.NewDesc(
@@ -61,11 +61,11 @@ func NewAPICollector(constants *Constants) *APICollector {
 			nil, constLabels,
 		),
 		txBlockRate: prometheus.NewDesc(
-			"tx_block_rate", "Current tx block rate",
+			"tx_block_rate", "Current TX block rate",
 			nil, constLabels,
 		),
 		dsBlockRate: prometheus.NewDesc(
-			"ds_block_rate", "Current ds block rate",
+			"ds_block_rate", "Current DS block rate",
 			nil, constLabels,
 		),
 		numPeers: prometheus.NewDesc(

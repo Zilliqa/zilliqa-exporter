@@ -54,7 +54,7 @@ func NewAdminCollector(constants *Constants) *AdminCollector {
 		options:   constants.options,
 		constants: constants,
 		adminServerUp: prometheus.NewDesc(
-			"admin_server_up", "Admin JsonRPC server up and running",
+			"admin_server_up", "Admin JsonRPC server (status server) up and running",
 			[]string{"endpoint"}, constLabels,
 		),
 		epoch: prometheus.NewDesc(

@@ -122,6 +122,7 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 	pid := process.Pid
 	cwd, _ := process.Cwd()
 	labels := []string{strconv.Itoa(int(pid)), cwd}
+	ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 1, labels...)
 
 	wg := sync.WaitGroup{}
 
