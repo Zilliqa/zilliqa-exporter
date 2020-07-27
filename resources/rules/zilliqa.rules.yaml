@@ -1,0 +1,52 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app: zilliqa-exporter
+  name: zilliqa-exporter.rules
+spec:
+  groups:
+  - name: zilliqa-exporter.rules
+    rules:
+    - record: zilliqa:epoch:outofsynnc
+      expr: scalar(max(epoch)) - epoch
+    - alert: OutOfSync
+      annotations:
+        message: |
+          {{ $labels.pod_name }} are {{ $value }} epochs behined the network
+      expr: 5 > zilliqa:epoch:outofsynnc >= 3
+      for: 5m
+      labels:
+        severity: warning
+    - alert: OutOfSync
+      annotations:
+        message: |
+          {{ $labels.pod_name }} are {{ $value }} epochs behined the network, node maybe stalled
+      expr: zilliqa:epoch:outofsynnc > 5
+      for: 5m
+      labels:
+        severity: critical
+    - alert: OutOfStorage
+      annotations:
+        message: |
+          storage of {{ $labels.pod_name }} reached {{ $value }}%
+      expr: storage_used / storage_total * 100 > 75
+      for: 5m
+      labels:
+        severity: warning
+    - alert: ApiServerDown
+      annotations:
+        message: |
+          api server of {{ $labels.pod_name }} is not at service
+      expr: api_server_up == 0
+      for: 5m
+      labels:
+        severity: critical
+    - alert: AdminServerDown
+      annotations:
+        message: |
+          admin server of {{ $labels.pod_name }} is not at service
+      expr: admin_server_up == 0
+      for: 5m
+      labels:
+        severity: critical
