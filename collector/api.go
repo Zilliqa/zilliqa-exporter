@@ -40,79 +40,79 @@ type APICollector struct {
 }
 
 func NewAPICollector(constants *Constants) *APICollector {
-	constLabels := constants.ConstLabels()
+	commonLabels := constants.CommonLabels()
 	return &APICollector{
 		options:   constants.options,
 		constants: constants,
 		apiServerUp: prometheus.NewDesc(
 			"api_server_up", "JsonRPC API server up and running",
-			[]string{"endpoint"}, constLabels,
+			append([]string{"endpoint"}, commonLabels...), nil,
 		),
 		epoch: prometheus.NewDesc(
 			"epoch", "Current TX block number of the node",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		dsEpoch: prometheus.NewDesc(
 			"ds_epoch", "Current DS block number of the node",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		transactionRate: prometheus.NewDesc(
 			"transaction_rate", "Current transaction rate",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		txBlockRate: prometheus.NewDesc(
 			"tx_block_rate", "Current TX block rate",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		dsBlockRate: prometheus.NewDesc(
 			"ds_block_rate", "Current DS block rate",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numPeers: prometheus.NewDesc(
 			"num_peers", "Peers count",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numTransactions: prometheus.NewDesc(
 			"num_transactions", "Transactions count",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numTxBlocks: prometheus.NewDesc(
 			"num_tx_blocks", "Current tx block rate",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numDSBlocks: prometheus.NewDesc(
 			"num_ds_blocks", "DS blocks count",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numTxnsTxEpoch: prometheus.NewDesc(
 			"num_txns_tx_epoch", "numTxnsTxEpoch",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		numTxnsDSEpoch: prometheus.NewDesc(
 			"num_txns_ds_epoch", "numTxnsDSEpoch",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		shardingPeers: prometheus.NewDesc(
 			"sharding_peers", "Peers count of every sharding",
-			[]string{"index"}, constLabels,
+			append([]string{"index"}, commonLabels...), nil,
 		),
 		difficulty: prometheus.NewDesc(
 			"difficulty", "The minimum shard difficulty of the previous block",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		dsDifficulty: prometheus.NewDesc(
 			"ds_difficulty", "The minimum DS difficulty of the previous block",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		networkID: prometheus.NewDesc(
 			"network_id", "Network ID of current zilliqa network",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 	}
 }
 
 func (c *APICollector) Describe(ch chan<- *prometheus.Desc) {
-	if !c.options.IsGeneralLookup() {
+	if !IsGeneralLookup(c.constants.NodeType()) {
 		return
 	}
 	ch <- c.apiServerUp
@@ -134,7 +134,8 @@ func (c *APICollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
-	if !c.options.IsGeneralLookup() {
+	labels := c.constants.CommonLabelValues()
+	if !IsGeneralLookup(c.constants.NodeType()) {
 		log.Debug("not a lookup server, skip api server info collection")
 		return
 	}
@@ -148,30 +149,33 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 	info, err := cli.GetBlockchainInfo()
 	if err != nil {
 		log.WithError(err).Error("error while getting blockchain info")
-		ch <- prometheus.MustNewConstMetric(c.apiServerUp, prometheus.GaugeValue, float64(0), c.options.APIEndpoint())
+		ch <- prometheus.MustNewConstMetric(c.apiServerUp, prometheus.GaugeValue, float64(0),
+			append([]string{c.options.APIEndpoint()}, labels...)...)
 		return
 	}
-	ch <- prometheus.MustNewConstMetric(c.apiServerUp, prometheus.GaugeValue, float64(1), c.options.APIEndpoint())
+	ch <- prometheus.MustNewConstMetric(c.apiServerUp, prometheus.GaugeValue, float64(1),
+		append([]string{c.options.APIEndpoint()}, labels...)...)
 	epoch, _ := strconv.ParseFloat(info.CurrentMiniEpoch, 64)
-	ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch)
+	ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch, labels...)
 	dsEpoch, _ := strconv.ParseFloat(info.CurrentDSEpoch, 64)
-	ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch)
-	ch <- prometheus.MustNewConstMetric(c.transactionRate, prometheus.GaugeValue, info.TransactionRate)
-	ch <- prometheus.MustNewConstMetric(c.txBlockRate, prometheus.GaugeValue, info.TxBlockRate)
-	ch <- prometheus.MustNewConstMetric(c.dsBlockRate, prometheus.GaugeValue, info.DSBlockRate)
-	ch <- prometheus.MustNewConstMetric(c.numPeers, prometheus.GaugeValue, float64(info.NumPeers))
+	ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch, labels...)
+	ch <- prometheus.MustNewConstMetric(c.transactionRate, prometheus.GaugeValue, info.TransactionRate, labels...)
+	ch <- prometheus.MustNewConstMetric(c.txBlockRate, prometheus.GaugeValue, info.TxBlockRate, labels...)
+	ch <- prometheus.MustNewConstMetric(c.dsBlockRate, prometheus.GaugeValue, info.DSBlockRate, labels...)
+	ch <- prometheus.MustNewConstMetric(c.numPeers, prometheus.GaugeValue, float64(info.NumPeers), labels...)
 	numTransactions, _ := strconv.ParseFloat(info.NumTransactions, 64)
-	ch <- prometheus.MustNewConstMetric(c.numTransactions, prometheus.GaugeValue, numTransactions)
+	ch <- prometheus.MustNewConstMetric(c.numTransactions, prometheus.GaugeValue, numTransactions, labels...)
 	numTxBlocks, _ := strconv.ParseFloat(info.NumTxBlocks, 64)
-	ch <- prometheus.MustNewConstMetric(c.numTxBlocks, prometheus.GaugeValue, numTxBlocks)
+	ch <- prometheus.MustNewConstMetric(c.numTxBlocks, prometheus.GaugeValue, numTxBlocks, labels...)
 	numDSBlocks, _ := strconv.ParseFloat(info.NumDSBlocks, 64)
-	ch <- prometheus.MustNewConstMetric(c.numDSBlocks, prometheus.GaugeValue, numDSBlocks)
+	ch <- prometheus.MustNewConstMetric(c.numDSBlocks, prometheus.GaugeValue, numDSBlocks, labels...)
 	numTxnsTxEpoch, _ := strconv.ParseFloat(info.NumTxnsTxEpoch, 64)
-	ch <- prometheus.MustNewConstMetric(c.numTxnsTxEpoch, prometheus.GaugeValue, numTxnsTxEpoch)
+	ch <- prometheus.MustNewConstMetric(c.numTxnsTxEpoch, prometheus.GaugeValue, numTxnsTxEpoch, labels...)
 	numTxnsDSEpoch, _ := strconv.ParseFloat(info.NumTxnsDSEpoch, 64)
-	ch <- prometheus.MustNewConstMetric(c.numTxnsDSEpoch, prometheus.GaugeValue, numTxnsDSEpoch)
+	ch <- prometheus.MustNewConstMetric(c.numTxnsDSEpoch, prometheus.GaugeValue, numTxnsDSEpoch, labels...)
 	for i, peers := range info.ShardingStructure.NumPeers {
-		ch <- prometheus.MustNewConstMetric(c.shardingPeers, prometheus.GaugeValue, float64(peers), strconv.Itoa(i))
+		ch <- prometheus.MustNewConstMetric(c.shardingPeers, prometheus.GaugeValue, float64(peers),
+			append([]string{strconv.Itoa(i)}, labels...)...)
 	}
 	log.Debug("done GetBlockchainInfo")
 
@@ -185,7 +189,7 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 			log.WithError(err).Error("fail to GetPrevDifficulty")
 			return
 		}
-		ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, float64(resp))
+		ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, float64(resp), labels...)
 		log.Debug("done GetPrevDifficulty")
 	}()
 
@@ -198,7 +202,7 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 			log.WithError(err).Error("fail to GetPrevDSDifficulty")
 			return
 		}
-		ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, float64(resp))
+		ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, float64(resp), labels...)
 		log.Debug("done GetPrevDSDifficulty")
 	}()
 
@@ -214,7 +218,7 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 		if err != nil {
 			log.WithError(err).Error("fail to parse GetNetworkId as number")
 		}
-		ch <- prometheus.MustNewConstMetric(c.networkID, prometheus.GaugeValue, netID)
+		ch <- prometheus.MustNewConstMetric(c.networkID, prometheus.GaugeValue, netID, labels...)
 		log.Debug("done GetNetworkId")
 	}()
 	wg.Wait()

@@ -3,14 +3,12 @@ package utils
 import (
 	"context"
 	"fmt"
-	"github.com/shirou/gopsutil/process"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -85,43 +83,4 @@ func GetExecOutput(name string, args ...string) string {
 	_, err = io.Copy(buf, out)
 	_ = cmd.Wait()
 	return buf.String()
-}
-
-func GetZilliqaMainProcess() *process.Process {
-	processes, err := process.Processes()
-	if err != nil {
-		log.WithError(err).Error("fail to get zilliqa main process")
-		return nil
-	}
-	for _, p := range processes {
-		connections, err := p.Connections()
-		if err != nil {
-			continue
-		}
-		for _, conn := range connections {
-			if conn.Laddr.Port == 33133 {
-				return p
-			}
-		}
-	}
-	return nil
-}
-
-func GetZilliqadProcess() *process.Process {
-	processes, err := process.Processes()
-	if err != nil {
-		log.WithError(err).Error("fail to get zilliqad main process")
-		return nil
-	}
-	for _, proc := range processes {
-		name, err := proc.Name()
-		if err != nil {
-			log.WithError(err).Error("fail to get zilliqad main process")
-			return nil
-		}
-		if filepath.Base(name) == "zilliqad" {
-			return proc
-		}
-	}
-	return nil
 }

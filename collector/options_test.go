@@ -20,7 +20,6 @@ func TestCheckEndpoint(t *testing.T) {
 		nodeType:              "lookup",
 	}
 
-	cli, err := options.CheckGetAPIClient()
-	assert.NoError(err)
+	cli := options.GetAPIClient()
 	assert.NotNil(cli)
 }

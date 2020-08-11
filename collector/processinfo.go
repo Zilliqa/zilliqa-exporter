@@ -5,7 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/disk"
 	log "github.com/sirupsen/logrus"
-	"github.com/zilliqa/zilliqa-exporter/utils"
 	"strconv"
 	"strings"
 	"sync"
@@ -37,41 +36,41 @@ type ProcessInfoCollector struct {
 var processLabels = []string{"pid", "cwd"}
 
 func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
-	constLabels := constants.ConstLabels()
+	commonLabels := append(constants.CommonLabels(), processLabels...)
 	return &ProcessInfoCollector{
 		options:   constants.options,
 		constants: constants,
 		processRunning: prometheus.NewDesc(
 			"zilliqa_process_running", "If zilliqa process is running",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		syncType: prometheus.NewDesc(
 			"synctype", "Synctype from zilliqa commandline options",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		nodeType: prometheus.NewDesc(
 			"nodetype", "Nodetype from zilliqa commandline options",
-			append([]string{"text"}, processLabels...), constLabels,
+			append([]string{"text"}, commonLabels...), nil,
 		),
 		nodeIndex: prometheus.NewDesc(
 			"nodeindex", "Nodeindex from zilliqa commandline options",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		uptime: prometheus.NewDesc(
 			"node_uptime", "Uptime of zilliqa node",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		connectionCount: prometheus.NewDesc(
 			"connection_count", "Connection count of zilliqa process",
-			append([]string{"local_port", "status"}, processLabels...), constLabels,
+			append([]string{"local_port", "status"}, commonLabels...), nil,
 		),
 		threadCount: prometheus.NewDesc(
 			"thread_count", "Thread count of zilliqa process",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		fdCount: prometheus.NewDesc(
 			"fd_count", "Opened files count of zilliqa process",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		//cpuPercent: prometheus.NewDesc(
 		//	"cpu_percent", "CPU usage percent of zilliqa process",
@@ -83,11 +82,11 @@ func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
 		//),
 		storageTotal: prometheus.NewDesc(
 			"storage_total", "Total capacity of zilliqa persistence storage",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 		storageUsed: prometheus.NewDesc(
 			"storage_used", "Used space of zilliqa persistence storage",
-			processLabels, constLabels,
+			commonLabels, nil,
 		),
 	}
 }
@@ -112,16 +111,16 @@ func (c *ProcessInfoCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
-	process := utils.GetZilliqaMainProcess()
-	processd := utils.GetZilliqadProcess()
+	process := GetZilliqaMainProcess(c.constants)
+	processd := GetZilliqadProcess()
 	if process == nil {
 		log.Error("no running zilliqa process found")
-		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, "0", "")
+		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, append(c.constants.CommonLabelValues(), "0", "")...)
 		return
 	}
 	pid := process.Pid
 	cwd, _ := process.Cwd()
-	labels := []string{strconv.Itoa(int(pid)), cwd}
+	labels := append(c.constants.CommonLabelValues(), strconv.Itoa(int(pid)), cwd)
 	ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 1, labels...)
 
 	wg := sync.WaitGroup{}
@@ -255,7 +254,7 @@ const (
 )
 
 func GetSyncTypeFromCmdline(cmdline []string) (int, error) {
-	value := GetParamValueFromCmdline(cmdline, "--synctype")
+	value := GetParamValueFromCmdline(cmdline, "--synctype", "-s")
 	if value == "" {
 		return 0, errors.New("not found")
 	}
@@ -263,30 +262,40 @@ func GetSyncTypeFromCmdline(cmdline []string) (int, error) {
 }
 
 func GetNodeTypeFromCmdline(cmdline []string) string {
-	return GetParamValueFromCmdline(cmdline, "--nodetype")
+	return GetParamValueFromCmdline(cmdline, "--nodetype", "-n")
 }
 
 func GetNodeIndexFromCmdline(cmdline []string) (int, error) {
-	value := GetParamValueFromCmdline(cmdline, "--nodeindex")
+	value := GetParamValueFromCmdline(cmdline, "--nodeindex", "-x")
 	if value == "" {
 		return 0, errors.New("not found")
 	}
 	return strconv.Atoi(value)
 }
 
-func GetParamValueFromCmdline(cmdline []string, param string) string {
+func GetPortFromCmdline(cmdline []string) (int, error) {
+	value := GetParamValueFromCmdline(cmdline, "--port", "-p")
+	if value == "" {
+		return 0, errors.New("not found")
+	}
+	return strconv.Atoi(value)
+}
+
+func GetParamValueFromCmdline(cmdline []string, param ...string) string {
 	for i, arg := range cmdline {
-		if strings.HasPrefix(arg, param) {
-			if strings.Contains(arg, "=") {
-				splits := strings.Split(arg, "=")
-				// --opt value
-				if len(splits) < 2 {
-					return cmdline[i+1]
+		for _, p := range param {
+			if strings.HasPrefix(arg, p) {
+				if strings.Contains(arg, "=") {
+					splits := strings.Split(arg, "=")
+					// --opt value
+					if len(splits) < 2 {
+						return cmdline[i+1]
+					}
+					// --opt=value
+					return splits[1]
 				}
-				// --opt=value
-				return splits[1]
+				return cmdline[i+1]
 			}
-			return cmdline[i+1]
 		}
 	}
 	return ""

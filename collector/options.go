@@ -13,49 +13,6 @@ import (
 	"time"
 )
 
-var DetectedNodeType NodeType
-
-type NodeType int
-
-const (
-	Lookup NodeType = iota
-	newLookup
-	Level2Lookup
-	Normal
-	DSGuard
-	UnknownNodeType
-)
-
-var nodeTypeStringMap = map[NodeType]string{
-	Lookup:          "lookup",
-	newLookup:       "newlookup",
-	Level2Lookup:    "level2lookup",
-	Normal:          "normal",
-	DSGuard:         "dsguard",
-	UnknownNodeType: "",
-}
-
-var (
-	lookUpTypes = []NodeType{Lookup, newLookup, Level2Lookup}
-	nodeTypes   = []NodeType{Lookup, newLookup, Level2Lookup, Normal, DSGuard}
-)
-
-func (n NodeType) String() string {
-	if s, ok := nodeTypeStringMap[n]; ok {
-		return s
-	}
-	return ""
-}
-
-func NodeTypeFromString(typ string) NodeType {
-	for _, t := range nodeTypes {
-		if strings.EqualFold(t.String(), typ) {
-			return t
-		}
-	}
-	return UnknownNodeType
-}
-
 const (
 	DefaultAPIEndpoint       = "127.0.0.1:4201"
 	DefaultAdminEndpoint     = "127.0.0.1:4301"
@@ -72,24 +29,25 @@ type Options struct {
 
 	zilliqaBin string
 
+	p2pPort           uint32
 	apiEndpoint       string
 	adminEndpoint     string
 	websocketEndpoint string
 
 	rpcTimeout time.Duration
 
-	// TODO: detect node type from process cmdline
 	nodeType string
 }
 
 func (c *Options) BindFlags(set *pflag.FlagSet) {
 	set.SortFlags = false
 	set.BoolVar(&c.IsMainNet, "mainnet", false, "collect mainnet metrics")
-	set.BoolVarP(&c.NotCollectAPI, "not-collect-api", "a", false, "do not collect metrics from JSONRPC API")
-	set.BoolVarP(&c.NotCollectAdmin, "not-collect-admin", "m", false, "do not collect metrics from Admin API")
-	set.BoolVarP(&c.NotCollectWebsocket, "not-collect-websocket", "w", false, "do not collect metrics from Websocket API")
-	set.BoolVarP(&c.NotCollectProcessInfo, "not-collect-process-info", "p", false, "do not collect metrics from Zilliqa Process")
+	set.BoolVar(&c.NotCollectAPI, "not-collect-api", false, "do not collect metrics from JSONRPC API")
+	set.BoolVar(&c.NotCollectAdmin, "not-collect-admin", false, "do not collect metrics from Admin API")
+	set.BoolVar(&c.NotCollectWebsocket, "not-collect-websocket", false, "do not collect metrics from Websocket API")
+	set.BoolVar(&c.NotCollectProcessInfo, "not-collect-process-info", false, "do not collect metrics from Zilliqa Process")
 	set.DurationVarP(&c.rpcTimeout, "rpc-timeout", "t", 10*time.Second, "timeout of rpc request")
+	set.Uint32Var(&c.p2pPort, "p2p-port", 33133, "p2p port of zilliqa node")
 	set.StringVar(&c.apiEndpoint, "api", "", "zilliqa jsonrpc endpoint")
 	set.StringVar(&c.adminEndpoint, "admin", "", "zilliqa admin api endpoint")
 	set.StringVar(&c.websocketEndpoint, "ws", "", "zilliqa websocket api endpoint")
@@ -140,44 +98,6 @@ func (c Options) WebsocketEndpoint() string {
 	return c.websocketEndpoint
 }
 
-//func (c Options) CheckGetAPIClient() (*provider.Provider, error) {
-//	ep := c.APIEndpoint()
-//	if ep == "" {
-//		return nil, errors.New("api endpoint not set")
-//	}
-//	//u, err := url.Parse(ep)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	//host := u.Host
-//	//if len(strings.Split(host, ":")) != 2 {
-//	//	if u.Scheme == "http" {
-//	//		host = host + ":80"
-//	//	} else if u.Scheme == "https" {
-//	//		host = host + ":443"
-//	//	}
-//	//}
-//	//if err := utils.CheckTCPPortOpen(host); err != nil {
-//	//	return nil, errors.Wrap(err, "cannot connect to api server")
-//	//}
-//	cli := c.GetAPIClient()
-//	_, err = cli.GetCurrentMiniEpoch()
-//	return cli, err
-//}
-//
-//func (c Options) CheckGetAdminClient() (*adminclient.Client, error) {
-//	ep := c.AdminEndpoint()
-//	if ep == "" {
-//		return nil, errors.New("admin endpoint not set")
-//	}
-//	//if err := utils.CheckTCPPortOpen(ep); err != nil {
-//	//	return nil, errors.Wrap(err, "cannot connect to admin server")
-//	//}
-//	cli := c.GetAdminClient()
-//	_, err := cli.GetCurrentMiniEpoch()
-//	return cli, err
-//}
-
 func (c Options) GetAPIClient() *provider.Provider {
 	ep := c.APIEndpoint()
 	if ep == "" {
@@ -194,24 +114,6 @@ func (c Options) GetAdminClient() *adminclient.Client {
 	return adminclient.New(ep, c.rpcTimeout)
 }
 
-func (c Options) IsGeneralLookup() bool {
-	var isLookup bool
-	nt := c.NodeType()
-	for _, typ := range lookUpTypes {
-		if nt == typ {
-			isLookup = true
-		}
-	}
-	return isLookup
-}
-
-func (c Options) NodeType() NodeType {
-	if c.nodeType == "" {
-		return DetectedNodeType
-	}
-	return NodeTypeFromString(c.nodeType)
-}
-
 func (c *Options) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.ToMap())
 }
@@ -224,10 +126,11 @@ func (c *Options) ToMap() map[string]interface{} {
 		"NotCollectWebsocket":   c.NotCollectWebsocket,
 		"NotCollectProcessInfo": c.NotCollectProcessInfo,
 		"ZilliqaBinPath":        c.ZilliqaBinPath(),
+		"p2pPort":               c.p2pPort,
 		"ApiEndpoint":           c.APIEndpoint(),
 		"AdminEndpoint":         c.AdminEndpoint(),
 		"WebsocketEndpoint":     c.WebsocketEndpoint(),
 		"RpcTimeout":            c.rpcTimeout.String(),
-		"NodeType":              c.NodeType().String(),
+		"NodeType":              c.nodeType,
 	}
 }

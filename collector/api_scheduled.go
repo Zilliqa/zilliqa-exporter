@@ -31,18 +31,16 @@ func NewScheduledCollector(option *Options, constants *Constants) *ScheduledColl
 }
 
 func (s *ScheduledCollector) Init(register prometheus.Registerer) {
-	constLabels := s.constants.ConstLabels()
+	//commonLabels := s.constants.CommonLabels()
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	if s.options.IsMainNet {
 		s.UDStateSize = prometheus.NewGauge(prometheus.GaugeOpts{
-			Name:        "ud_state_size",
-			Help:        "State data size of unstoppable domain contract",
-			ConstLabels: constLabels,
+			Name: "ud_state_size",
+			Help: "State data size of unstoppable domain contract",
 		})
 		s.UDStateEntries = prometheus.NewGauge(prometheus.GaugeOpts{
-			Name:        "ud_state_entries",
-			Help:        "State entries count of unstoppable domain contract",
-			ConstLabels: constLabels,
+			Name: "ud_state_entries",
+			Help: "State entries count of unstoppable domain contract",
 		})
 		register.MustRegister(s.UDStateSize, s.UDStateEntries)
 	}

@@ -91,8 +91,10 @@ func serve(listen string) error {
 		return nil
 	}
 
-	constants := collector.GetConstants(options)
-	constants.Register(prometheus.DefaultRegisterer)
+	constants := collector.NewConstants(options)
+	go constants.StartWatch()
+	defer constants.StopWatch()
+	prometheus.MustRegister(constants)
 
 	log.WithFields(options.ToMap()).Info("run with options")
 	constantJson, _ := json.Marshal(constants)
@@ -100,7 +102,7 @@ func serve(listen string) error {
 	_ = json.Unmarshal(constantJson, &constantsMap)
 	log.WithFields(constantsMap).Info("got constants")
 
-	if !options.NotCollectAPI || !options.IsGeneralLookup() {
+	if !options.NotCollectAPI {
 		prometheus.MustRegister(collector.NewAPICollector(constants))
 	} else {
 		log.Info("Not collecting info from API server")

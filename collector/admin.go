@@ -49,41 +49,41 @@ type AdminCollector struct {
 }
 
 func NewAdminCollector(constants *Constants) *AdminCollector {
-	constLabels := constants.ConstLabels()
+	commonLabels := constants.CommonLabels()
 	return &AdminCollector{
 		options:   constants.options,
 		constants: constants,
 		adminServerUp: prometheus.NewDesc(
 			"admin_server_up", "Admin JsonRPC server (status server) up and running",
-			[]string{"endpoint"}, constLabels,
+			append([]string{"endpoint"}, commonLabels...), nil,
 		),
 		epoch: prometheus.NewDesc(
 			"epoch", "Current TX block number of the node",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		dsEpoch: prometheus.NewDesc(
 			"ds_epoch", "Current DS block number of the node",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		difficulty: prometheus.NewDesc(
 			"difficulty", "The minimum shard difficulty of the previous block",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		dsDifficulty: prometheus.NewDesc(
 			"ds_difficulty", "The minimum DS difficulty of the previous block",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		nodeType: prometheus.NewDesc(
 			"node_type", "Zilliqa network node type",
-			[]string{"text"}, constLabels,
+			append([]string{"text"}, commonLabels...), nil,
 		),
 		shardId: prometheus.NewDesc(
 			"shard_id", "Shard ID of the shard of current node",
-			nil, constLabels,
+			commonLabels, nil,
 		),
 		nodeState: prometheus.NewDesc(
 			"node_state", "Node state",
-			[]string{"text"}, constLabels,
+			append([]string{"text"}, commonLabels...), nil,
 		),
 	}
 }
@@ -91,7 +91,7 @@ func NewAdminCollector(constants *Constants) *AdminCollector {
 func (c *AdminCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.adminServerUp
 	ch <- c.nodeType
-	if !c.options.IsGeneralLookup() {
+	if !IsGeneralLookup(c.constants.NodeType()) {
 		ch <- c.epoch
 		ch <- c.dsEpoch
 		ch <- c.difficulty
@@ -102,6 +102,7 @@ func (c *AdminCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
+	labels := c.constants.CommonLabelValues()
 	log.Debug("enter admin collector")
 	cli := c.options.GetAdminClient()
 	if cli == nil {
@@ -112,16 +113,20 @@ func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 	nodeType, err := cli.GetNodeType()
 	if err != nil {
 		log.WithError(err).Error("error while getting NodeType from admin API")
-		ch <- prometheus.MustNewConstMetric(c.adminServerUp, prometheus.GaugeValue, float64(0), c.options.AdminEndpoint())
+		ch <- prometheus.MustNewConstMetric(c.adminServerUp, prometheus.GaugeValue, float64(0),
+			append([]string{c.options.AdminEndpoint()}, labels...)...)
 		return
 	}
-	ch <- prometheus.MustNewConstMetric(c.adminServerUp, prometheus.GaugeValue, float64(1), c.options.AdminEndpoint())
-	ch <- prometheus.MustNewConstMetric(c.nodeType, prometheus.GaugeValue, float64(nodeType.Type), nodeType.Type.String())
+	ch <- prometheus.MustNewConstMetric(c.adminServerUp, prometheus.GaugeValue, float64(1),
+		append([]string{c.options.AdminEndpoint()}, labels...)...)
+	ch <- prometheus.MustNewConstMetric(c.nodeType, prometheus.GaugeValue, float64(nodeType.Type),
+		append([]string{nodeType.String()}, labels...)...)
+
 	if nodeType.Type == adminclient.ShardNode {
-		ch <- prometheus.MustNewConstMetric(c.shardId, prometheus.GaugeValue, float64(nodeType.ShardId))
+		ch <- prometheus.MustNewConstMetric(c.shardId, prometheus.GaugeValue, float64(nodeType.ShardId), labels...)
 	}
 
-	if !c.options.IsGeneralLookup() {
+	if !IsGeneralLookup(c.constants.NodeType()) {
 		reqs := []*jsonrpc.Request{
 			adminclient.NewGetCurrentMiniEpochReq(),
 			adminclient.NewGetCurrentDSEpochReq(),
@@ -141,28 +146,28 @@ func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 		if err != nil {
 			log.WithError(err).Error("error while getting miniEpoch from admin API")
 		} else {
-			ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch)
+			ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch, labels...)
 		}
 
 		dsEpoch, err := resps[1].GetFloat64()
 		if err != nil {
 			log.WithError(err).Error("error while getting dsEpoch from admin API")
 		} else {
-			ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch)
+			ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch, labels...)
 		}
 
 		diff, err := resps[2].GetFloat64()
 		if err != nil {
 			log.WithError(err).Error("error while getting prevDifficulty from admin API")
 		} else {
-			ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, diff)
+			ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, diff, labels...)
 		}
 
 		dsDiff, err := resps[3].GetFloat64()
 		if err != nil {
 			log.WithError(err).Error("error while getting prevDSDifficulty from admin API")
 		} else {
-			ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, dsDiff)
+			ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, dsDiff, labels...)
 		}
 
 		// TODO: node state
@@ -171,7 +176,7 @@ func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 		//if err != nil {
 		//	log.WithError(err).Error("error while getting nodeState from admin API")
 		//} else {
-		//	ch <- prometheus.MustNewConstMetric(c.nodeState, prometheus.GaugeValue, float64(state), state.String())
+		//	ch <- prometheus.MustNewConstMetric(c.nodeState, prometheus.GaugeValue, float64(state), state.String(), labels...)
 		//}
 	}
 	log.Debug("exit admin collector")

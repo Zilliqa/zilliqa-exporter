@@ -20,4 +20,8 @@ func TestCmdlineProcess(t *testing.T) {
 
 	nt := GetNodeTypeFromCmdline(cmdline)
 	assert.Equal(nt, "")
+
+	pt, err := GetPortFromCmdline(cmdline)
+	assert.NoError(err)
+	assert.Equal(pt, 33133)
 }
