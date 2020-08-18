@@ -6,15 +6,19 @@ metadata:
   name: zilliqa-exporter.rules
 spec:
   groups:
-  - name: zilliqa-exporter.rules
+  - name: zilliqa-exporter.records
     rules:
-    - record: zilliqa:epoch:outofsynnc
+    - record: zilliqa:epoch:outofsync
       expr: scalar(max(epoch)) - epoch
+
+
+  - name: zilliqa-exporter.alerts
+    rules:
     - alert: OutOfSync
       annotations:
         message: |
           {{ $labels.pod_name }} are {{ $value }} epochs behined the network
-      expr: 5 > zilliqa:epoch:outofsynnc >= 3
+      expr: 5 > zilliqa:epoch:outofsync >= 3
       for: 5m
       labels:
         severity: warning
@@ -22,7 +26,7 @@ spec:
       annotations:
         message: |
           {{ $labels.pod_name }} are {{ $value }} epochs behined the network, node maybe stalled
-      expr: zilliqa:epoch:outofsynnc > 5
+      expr: zilliqa:epoch:outofsync > 5
       for: 5m
       labels:
         severity: critical
