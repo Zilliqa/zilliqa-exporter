@@ -34,9 +34,9 @@ type APICollector struct {
 	difficulty   *prometheus.Desc
 	dsDifficulty *prometheus.Desc
 
-	// misc node information, from both admin and lookup api
-	// GetNetworkId of api
-	networkID *prometheus.Desc
+	// misc
+	networkID              *prometheus.Desc
+	latestTxBlockTimestamp *prometheus.Desc
 }
 
 func NewAPICollector(constants *Constants) *APICollector {
@@ -108,6 +108,10 @@ func NewAPICollector(constants *Constants) *APICollector {
 			"network_id", "Network ID of current zilliqa network",
 			commonLabels, nil,
 		),
+		latestTxBlockTimestamp: prometheus.NewDesc(
+			"latest_txblock_timestamp", "The timestamp of the latest tx block",
+			commonLabels, nil,
+		),
 	}
 }
 
@@ -131,6 +135,7 @@ func (c *APICollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.difficulty
 	ch <- c.dsDifficulty
 	ch <- c.networkID
+	ch <- c.latestTxBlockTimestamp
 }
 
 func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
@@ -219,6 +224,21 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 			log.WithError(err).Error("fail to parse GetNetworkId as number")
 		}
 		ch <- prometheus.MustNewConstMetric(c.networkID, prometheus.GaugeValue, netID, labels...)
+		log.Debug("done GetNetworkId")
+	}()
+	wg.Add(1)
+	go func() {
+		log.Debug("start GetLatestBlock info")
+		defer wg.Done()
+		block, err := cli.GetLatestTxBlock()
+		if err != nil {
+			log.WithError(err).Error("fail to GetLatestTxBlock")
+		}
+		ts, err := strconv.ParseFloat(block.Header.Timestamp, 64)
+		if err != nil {
+			log.WithError(err).WithField("block", block).Error("fail to parse LatestBlock.Header.Timestamp as number")
+		}
+		ch <- prometheus.MustNewConstMetric(c.latestTxBlockTimestamp, prometheus.GaugeValue, ts/1000, labels...)
 		log.Debug("done GetNetworkId")
 	}()
 	wg.Wait()
