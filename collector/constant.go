@@ -137,19 +137,23 @@ func (c *Constants) P2PPort() uint32 {
 	return c.p2pPort
 }
 
+func nodeTypeFromPodName(podName string) NodeType {
+	split := strings.Split(podName, "-") // xxx-TYPE-INDEX (generated pod name of stateful set)
+	if len(split) > 2 {
+		return NodeTypeFromString(split[len(split)-2])
+	}
+	return UnknownNodeType
+}
+
 func (c *Constants) doDetectVars() {
 	var nodeTypeDetected bool
 	var p2pPortDetected bool
 
 	if c.PodName != "" {
-		split := strings.Split(c.PodName, "-") // xxx-TYPE-INDEX (generated pod name of stateful set)
-		if len(split) > 2 {
-			name := NodeTypeFromString(split[len(split)-2])
-			if string(name) != "" {
-				c.nodeType = name
-				nodeTypeDetected = true
-				return
-			}
+		nt := nodeTypeFromPodName(c.PodName)
+		if nt != UnknownNodeType {
+			c.nodeType = nt
+			nodeTypeDetected = true
 		}
 	}
 
@@ -164,7 +168,7 @@ func (c *Constants) doDetectVars() {
 		log.WithError(err).Error("fail to get cmdline")
 		return
 	} else {
-		if nt := GetNodeTypeFromCmdline(cmdline); nt != "" {
+		if nt := GetNodeTypeFromCmdline(cmdline); !nodeTypeDetected && nt != "" {
 			c.nodeType = NodeTypeFromString(nt)
 			nodeTypeDetected = true
 		}

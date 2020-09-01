@@ -16,41 +16,78 @@ spec:
     rules:
     - alert: OutOfSync
       annotations:
-        message: |
-          {{ $labels.pod_name }} are {{ $value }} epochs behined the network
+        message: '{{ $labels.pod_name }} are {{ $value }} epochs behined the network'
       expr: 5 > zilliqa:epoch:outofsync >= 3
       for: 5m
       labels:
         severity: warning
     - alert: OutOfSync
       annotations:
-        message: |
-          {{ $labels.pod_name }} are {{ $value }} epochs behined the network, node maybe stalled
+        message: '{{ $labels.pod_name }} are {{ $value }} epochs behined the network, node maybe stalled'
       expr: zilliqa:epoch:outofsync > 5
       for: 5m
       labels:
         severity: critical
     - alert: OutOfStorage
       annotations:
-        message: |
-          storage of {{ $labels.pod_name }} reached {{ $value }}%
+        message: 'storage usage of {{ $labels.pod_name }} reached {{ printf "%.2f" $value }}%'
       expr: storage_used / storage_total * 100 > 75
       for: 5m
       labels:
         severity: warning
     - alert: ApiServerDown
       annotations:
-        message: |
-          api server of {{ $labels.pod_name }} is not at service
+        message: 'api server of {{ $labels.pod_name }} is not at service'
       expr: api_server_up == 0
       for: 5m
       labels:
         severity: critical
     - alert: AdminServerDown
       annotations:
-        message: |
-          admin server of {{ $labels.pod_name }} is not at service
+        message: 'admin server of {{ $labels.pod_name }} is not at service'
       expr: admin_server_up == 0
       for: 5m
       labels:
         severity: critical
+    - alert: NetworkStall
+      annotations:
+        message: 'latest Tx block was mined {{ printf "%.2f" $value }} minutes ago, network maybe stalled'
+      expr: (time() - (latest_txblock_timestamp / 1e3)) / 60 > 2
+      for: 14m
+      labels:
+        severity: critical
+    - alert: ZilliqaProcessNotRunning
+      annotations:
+        message: 'no running zilliqa process found in this node'
+      expr: zilliqa_process_running == 0
+      for: 5m
+      labels:
+        severity: critical
+    - alert: ZilliqaProcessRestarted
+      annotations:
+        message: 'zilliqa process restarted recentlly'
+      expr: delta(node_uptime[10m]) < 0
+      for: 1m
+      labels:
+        severity: warning
+    - alert: ConnectionBurst
+      annotations:
+        message: 'TCP connection count burst of zilliqa process detected'
+      expr: delta(connection_count[1m]) > 100
+      for: 5m
+      labels:
+        severity: warning
+    - alert: ThreadBurst
+      annotations:
+        message: 'Thread count burst of zilliqa process detected'
+      expr: delta(thread_count[1m]) > 100
+      for: 5m
+      labels:
+        severity: warning
+    - alert: FdBurst
+      annotations:
+        message: 'File descriptor count burst of zilliqa process detected'
+      expr: delta(fd_count[1m]) > 100
+      for: 5m
+      labels:
+        severity: warning

@@ -1,6 +1,6 @@
 # Zilliqa Exporter
 
-A daemon that exports metrics of Zilliqa node to Prometheus
+A daemon that exports metrics of Zilliqa node as [Open Metrics](https://github.com/OpenObservability/OpenMetrics) Format
 
 ## Common Labels:
 | Name         | Description                                                                                                        |
@@ -30,7 +30,7 @@ Only collect once when exporter starts.
 ### API Collector
 
 Collect info from zilliqa node's JSONRPC API server
-Only for Lookup, Seed, Level2Lookup
+Only for Lookup, Seed, Seed-apipub(Level2Lookup)
 
 | Metric                   | Description                                         | Method              | Additional Labels |
 | :----------------------- | :-------------------------------------------------- | :------------------ | :---------------- |

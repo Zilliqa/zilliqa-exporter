@@ -21,8 +21,10 @@ const (
 var stringNodeTypeMap = map[string]NodeType{
 	"lookup":       Lookup,
 	"seed-apipub":  SeedAPIPub,
+	"apipub":  SeedAPIPub,
 	"level2lookup": SeedAPIPub,
 	"seed-apiprv":  SeedAPIPrv,
+	"apiprv":  SeedAPIPrv,
 	"newlookup":    SeedAPIPrv,
 	"normal":       Normal,
 	"dsguard":      DSGuard,
