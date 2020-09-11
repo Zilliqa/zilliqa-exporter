@@ -96,6 +96,25 @@ func serve(listen string) error {
 	defer constants.StopWatch()
 	prometheus.MustRegister(constants)
 
+	versionInfo := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "zilliqa_exporter_version_info",
+		Help: "the version information of zilliqa exporter",
+		ConstLabels: prometheus.Labels{
+			"version":      version,
+			"commit":       commit,
+			"branch":       branch,
+			"tag":          tag,
+			"date":         date,
+			"buildInfo":    buildInfo,
+			"type":         constants.NodeType().String(),
+			"cluster_name": constants.ClusterName,
+			"network_name": constants.NetworkName,
+			"pod_name":     constants.PodName,
+		},
+	})
+	prometheus.MustRegister(versionInfo)
+	versionInfo.Set(1)
+
 	log.WithFields(options.ToMap()).Info("run with options")
 	constantJson, _ := json.Marshal(constants)
 	var constantsMap map[string]interface{}

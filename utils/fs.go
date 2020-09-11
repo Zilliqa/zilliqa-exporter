@@ -3,7 +3,10 @@ package utils
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strconv"
 )
 
 func PathExists(path string) bool {
@@ -34,4 +37,25 @@ func EnsureDir(dir string) error {
 		return errors.New(fmt.Sprintf("path %s exists but is not a directory", dir))
 	}
 	return os.MkdirAll(dir, 0755)
+}
+
+func ReadFloat64(file string) (float64, error) {
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		return 0, err
+	}
+	val, err := strconv.ParseFloat(string(data), 64)
+	return val, err
+}
+
+func FindFile(paths, names []string) string {
+	for _, path := range paths {
+		for _, name := range names {
+			p := filepath.Join(path, name)
+			if PathExists(p) {
+				return p
+			}
+		}
+	}
+	return ""
 }
