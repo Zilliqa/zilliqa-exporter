@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func PathExists(path string) bool {
@@ -44,7 +45,7 @@ func ReadFloat64(file string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	val, err := strconv.ParseFloat(string(data), 64)
+	val, err := strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
 	return val, err
 }
 

@@ -38,6 +38,7 @@ type ProcessInfoCollector struct {
 	// /sys/fs/cgroup/cpuacct/cpu.cfs_quota_us
 	containerCPUCFSQuotaMicroseconds *prometheus.Desc
 	// /sys/fs/cgroup/cpuacct/cpu.cfs_period_us
+	// https://www.kernel.org/doc/Documentation/scheduler/sched-bwc.txt
 	containerCPUCFSPeriodMicroseconds *prometheus.Desc
 	containerCPUCoresLimitEquivalence *prometheus.Desc
 	// from psutil process.Process.Times()
@@ -102,7 +103,7 @@ func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
 		),
 
 		nodeCPUUsageSeconds: prometheus.NewDesc(
-			"node_cpu_usage_nano_seconds", "cpu usage in nano seconds of the node",
+			"node_cpu_usage_seconds", "cpu usage in nano seconds of the node",
 			commonLabels, nil,
 		),
 		nodeCPUCoresCount: prometheus.NewDesc(
@@ -110,15 +111,15 @@ func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
 			commonLabels, nil,
 		),
 		containerCPUUsageSeconds: prometheus.NewDesc(
-			"container_cpu_cfs_usage_nano_seconds", "cpu usage in nano seconds of the container",
+			"container_cpu_usage_seconds", "cpu usage in nano seconds of the container",
 			commonLabels, nil,
 		),
 		containerCPUCFSQuotaMicroseconds: prometheus.NewDesc(
-			"container_cpu_cfs_quota_micro_seconds", "cpu CFS quota in microseconds of the container",
+			"container_cpu_cfs_quota_microseconds", "cpu CFS quota in microseconds of the container",
 			commonLabels, nil,
 		),
 		containerCPUCFSPeriodMicroseconds: prometheus.NewDesc(
-			"container_cpu_cfs_period_micro_seconds", "cpu CFS period in microseconds of the container",
+			"container_cpu_cfs_period_microseconds", "cpu CFS period in microseconds of the container",
 			commonLabels, nil,
 		),
 		containerCPUCoresLimitEquivalence: prometheus.NewDesc(
@@ -146,11 +147,11 @@ func NewProcessInfoCollector(constants *Constants) *ProcessInfoCollector {
 
 
 		processCPUUsageSeconds: prometheus.NewDesc(
-			"zilliqa_process_cpu_usage_nano_seconds", "cpu usage in nano seconds of the zilliqa main process",
+			"process_cpu_usage_seconds", "cpu usage in nano seconds of process",
 			processCommonLabels, nil,
 		),
 		processMemUsageBytes: prometheus.NewDesc(
-			"zilliqa_process_usage_bytes", "memory usage in bytes of the zilliqa main process",
+			"process_mem_usage_bytes", "memory usage in bytes of process",
 			processCommonLabels, nil,
 		),
 
