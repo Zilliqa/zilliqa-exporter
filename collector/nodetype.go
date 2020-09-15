@@ -6,26 +6,28 @@ type NodeType int
 
 const (
 	Lookup NodeType = iota
-	SeedAPIPub
-	SeedAPIPrv
+	SeedPub
+	SeedPrv
 	Normal
 	DSGuard
 	UnknownNodeType
 )
 
 const (
-	Level2Lookup = SeedAPIPub
-	NewLookup    = SeedAPIPrv
+	Level2Lookup = SeedPub
+	NewLookup    = SeedPrv
 )
 
 var stringNodeTypeMap = map[string]NodeType{
 	"lookup":       Lookup,
-	"seed-apipub":  SeedAPIPub,
-	"apipub":  SeedAPIPub,
-	"level2lookup": SeedAPIPub,
-	"seed-apiprv":  SeedAPIPrv,
-	"apiprv":  SeedAPIPrv,
-	"newlookup":    SeedAPIPrv,
+	"seed-apipub":  SeedPub,
+	"apipub":       SeedPub,
+	"seedpub":      SeedPub,
+	"level2lookup": SeedPub,
+	"seed-apiprv":  SeedPrv,
+	"apiprv":       SeedPrv,
+	"seedprv":      SeedPrv,
+	"newlookup":    SeedPrv,
 	"normal":       Normal,
 	"dsguard":      DSGuard,
 	"":             UnknownNodeType,
@@ -33,16 +35,16 @@ var stringNodeTypeMap = map[string]NodeType{
 
 var nodeTypeStringMap = map[NodeType]string{
 	Lookup:          "lookup",
-	SeedAPIPrv:      "seed-apiprv",
-	SeedAPIPub:      "seed-apipub",
+	SeedPrv:         "seedprv",
+	SeedPub:         "seedpub",
 	Normal:          "normal",
 	DSGuard:         "dsguard",
 	UnknownNodeType: "",
 }
 
 var (
-	lookUpTypes = []NodeType{Lookup, SeedAPIPub, SeedAPIPrv}
-	nodeTypes   = []NodeType{Lookup, SeedAPIPub, SeedAPIPrv, Normal, DSGuard}
+	lookUpTypes = []NodeType{Lookup, SeedPub, SeedPrv}
+	nodeTypes   = []NodeType{Lookup, SeedPub, SeedPrv, Normal, DSGuard}
 )
 
 func (n NodeType) String() string {

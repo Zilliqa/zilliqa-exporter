@@ -8,6 +8,6 @@ import (
 func TestDetectNodeTypeFromPOD_NAME(t *testing.T) {
 	assert := asserting.New(t)
 	nt := nodeTypeFromPodName("xxx-xxx-seed-apipub-0")
-	assert.Equal(SeedAPIPub, nt)
-	assert.Equal(SeedAPIPub.String(), nt.String())
+	assert.Equal(SeedPub, nt)
+	assert.Equal(SeedPub.String(), nt.String())
 }

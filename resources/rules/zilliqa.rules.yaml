@@ -16,14 +16,14 @@ spec:
     rules:
     - alert: OutOfSync
       annotations:
-        message: '{{ $labels.pod_name }} are {{ $value }} epochs behined the network'
+        message: '{{ $labels.pod_name }} are {{ $value }} epochs behind the network'
       expr: 5 > zilliqa:epoch:outofsync >= 3
       for: 5m
       labels:
         severity: warning
     - alert: OutOfSync
       annotations:
-        message: '{{ $labels.pod_name }} are {{ $value }} epochs behined the network, node maybe stalled'
+        message: '{{ $labels.pod_name }} are {{ $value }} epochs behind the network, node maybe stalled'
       expr: zilliqa:epoch:outofsync > 5
       for: 5m
       labels:
@@ -65,7 +65,7 @@ spec:
         severity: critical
     - alert: ZilliqaProcessRestarted
       annotations:
-        message: 'zilliqa process restarted recentlly'
+        message: 'zilliqa process restarted recently'
       expr: delta(node_uptime[10m]) < 0
       for: 1m
       labels:
