@@ -203,7 +203,7 @@ func (c *ProcessInfoCollector) Collect(ch chan<- prometheus.Metric) {
 	processd := GetZilliqadProcess()
 	if process == nil {
 		log.Error("no running zilliqa process found")
-		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, append(c.constants.CommonLabelValues(), "0", "")...)
+		ch <- prometheus.MustNewConstMetric(c.processRunning, prometheus.GaugeValue, 0, append(c.constants.CommonLabelValues(), "", "0", "")...)
 		return
 	}
 	pid := process.Pid
