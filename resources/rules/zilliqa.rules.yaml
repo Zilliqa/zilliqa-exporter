@@ -91,3 +91,18 @@ spec:
       for: 5m
       labels:
         severity: warning
+    # TODO: add container_name
+    - alert: ContainerCPUUsageHigh
+      annotations:
+        message: 'Container CPU usage percent of total limit is above {{ printf "%.2f" $value }}%'
+      expr: rate(container_cpu_usage_seconds[1m])  * 100 /  container_cpu_cores_limit_equivalence > 75
+      for: 5m
+      labels:
+        severity: warning
+    - alert: ContainerMemoryUsageHigh
+      annotations:
+        message: 'Container memory usage percent of total limit is above {{ printf "%.2f" $value }}%'
+      expr: container_mem_usage_bytes / container_mem_limit_bytes * 100 > 75
+      for: 5m
+      labels:
+        severity: warning

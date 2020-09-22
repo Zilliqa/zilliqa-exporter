@@ -19,8 +19,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 12,
-  "iteration": 1598920861320,
+  "id": 13,
+  "iteration": 1600322097978,
   "links": [],
   "panels": [
     {
@@ -63,7 +63,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "min(node_uptime{network_name=\"$network\",type!=\"\"})",
@@ -116,7 +116,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "#299c46",
+                "color": "green",
                 "value": null
               },
               {
@@ -157,7 +157,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "max(epoch{network_name=\"$network\"}) - min(epoch{network_name=\"$network\"})",
@@ -216,18 +216,19 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "last"
           ],
           "fields": "",
           "values": false
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
-          "expr": "time() - max(latest_txblock_timestamp{network_name=\"$network\"}/1000)",
+          "expr": "(time() - max(latest_txblock_timestamp / 1e3) by (network_name, cluster_name))",
           "interval": "",
+          "intervalFactor": 10,
           "legendFormat": "",
           "refId": "A"
         }
@@ -448,6 +449,7 @@
       },
       "id": 29,
       "options": {
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "mean"
@@ -458,7 +460,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "1-(sum(node:node_memory_bytes_available:sum) / sum(node:node_memory_bytes_total:sum))",
@@ -518,7 +520,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "sum(storage_used{network_name=\"$network\",type!=\"\"})/ sum(storage_total{network_name=\"$network\",type!=\"\"})",
@@ -566,6 +568,7 @@
       },
       "id": 23,
       "options": {
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "last"
@@ -576,7 +579,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "count(zilliqa:epoch:outofsync{network_name=\"$network\",type!=\"\"} <= 3) / count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -629,7 +632,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "max(num_tx_blocks{network_name=\"$network\"})",
@@ -684,7 +687,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "sum(node:node_memory_bytes_total:sum) - sum(node:node_memory_bytes_available:sum)",
@@ -738,7 +741,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "sum(node:node_memory_bytes_total:sum)",
@@ -792,7 +795,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "sum(storage_used{network_name=\"$network\",type!=\"\"})",
@@ -846,7 +849,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "sum(storage_total{network_name=\"$network\",type!=\"\"})",
@@ -899,7 +902,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "max(num_ds_blocks{network_name=\"$network\"})",
@@ -953,7 +956,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "max(sharding_peers{network_name=\"$network\"})",
@@ -1007,7 +1010,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.0.5",
       "targets": [
         {
           "expr": "count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -1233,11 +1236,45 @@
               "value": "warning"
             }
           ]
+        },
+        {
+          "$$hashKey": "object:1146",
+          "alias": "State",
+          "align": "auto",
+          "colorMode": "value",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "alertstate",
+          "sanitize": false,
+          "thresholds": [
+            "pending",
+            "firing"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "$$hashKey": "object:1288",
+              "text": "Pending",
+              "value": "pending"
+            },
+            {
+              "$$hashKey": "object:1328",
+              "text": "Firing",
+              "value": "firing"
+            }
+          ]
         }
       ],
       "targets": [
         {
-          "expr": "sum(ALERTS{alertname!=\"Watchdog\"}) by (alertname, pod, severity, job)",
+          "expr": "sum(ALERTS{alertname!=\"Watchdog\"}) by (alertname, alertstate, pod, severity, job)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1416,7 +1453,7 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 26,
+  "schemaVersion": 25,
   "style": "dark",
   "tags": [
     "zilliqa"
@@ -1426,9 +1463,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "renjie-slim",
-          "value": "renjie-slim"
+          "selected": false,
+          "text": "community700alpha6-16sep",
+          "value": "community700alpha6-16sep"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info, network_name)",
@@ -1471,5 +1508,5 @@
   "timezone": "",
   "title": "Zilliqa / Overview",
   "uid": "LkPIWMGMk",
-  "version": 11
+  "version": 5
 }
