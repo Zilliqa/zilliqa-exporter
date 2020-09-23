@@ -11,7 +11,7 @@ spec:
     - record: zilliqa:network:epoch
       expr: max(epoch) by (cluster_name, network_name)
     - record: zilliqa:epoch:outofsync
-      expr: scalar(max(epoch)) - epoch
+      expr: zilliqa:network:epoch - on(cluster_name, network_name) group_right(pod_name, public_ip) epoch
 
   - name: zilliqa-exporter.alerts
     rules:
