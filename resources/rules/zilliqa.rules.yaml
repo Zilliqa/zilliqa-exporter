@@ -106,3 +106,10 @@ spec:
       for: 5m
       labels:
         severity: warning
+    - alert: NodeNotInNetwork
+      annotations:
+        message: '{{ $labels.pod_name }} is "{{ $labels.text }}"'
+      expr: node_type == 0
+      for: 5m
+      labels:
+        severity: warning
