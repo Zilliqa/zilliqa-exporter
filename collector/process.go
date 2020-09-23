@@ -5,6 +5,7 @@ import (
 	"github.com/shirou/gopsutil/process"
 	log "github.com/sirupsen/logrus"
 	"path/filepath"
+	"strings"
 )
 
 func GetZilliqaMainProcess(constants *Constants) *process.Process {
@@ -14,7 +15,17 @@ func GetZilliqaMainProcess(constants *Constants) *process.Process {
 		return nil
 	}
 	if len(procs) > 0 {
-		return procs[0]
+		proc := procs[0]
+		name, err := proc.Name()
+		if err != nil {
+			log.WithError(err).Error("fail to get zilliqa main process")
+			return nil
+		} else if strings.EqualFold(filepath.Base(name), "scilla-server") {
+			log.Warn("scilla-server may inherited the p2p port of zilliqa process")
+			log.Error("fail to get zilliqa main process")
+			return nil
+		}
+		return proc
 	}
 	return nil
 }
