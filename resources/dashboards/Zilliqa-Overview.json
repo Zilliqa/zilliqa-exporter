@@ -19,8 +19,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 13,
-  "iteration": 1600322097978,
+  "id": 15,
+  "iteration": 1600773569329,
   "links": [],
   "panels": [
     {
@@ -63,7 +63,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "min(node_uptime{network_name=\"$network\",type!=\"\"})",
@@ -157,7 +157,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "max(epoch{network_name=\"$network\"}) - min(epoch{network_name=\"$network\"})",
@@ -223,7 +223,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "(time() - max(latest_txblock_timestamp / 1e3) by (network_name, cluster_name))",
@@ -460,7 +460,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "1-(sum(node:node_memory_bytes_available:sum) / sum(node:node_memory_bytes_total:sum))",
@@ -520,7 +520,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "sum(storage_used{network_name=\"$network\",type!=\"\"})/ sum(storage_total{network_name=\"$network\",type!=\"\"})",
@@ -579,7 +579,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "count(zilliqa:epoch:outofsync{network_name=\"$network\",type!=\"\"} <= 3) / count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -632,7 +632,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "max(num_tx_blocks{network_name=\"$network\"})",
@@ -687,7 +687,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "sum(node:node_memory_bytes_total:sum) - sum(node:node_memory_bytes_available:sum)",
@@ -741,7 +741,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "sum(node:node_memory_bytes_total:sum)",
@@ -795,7 +795,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "sum(storage_used{network_name=\"$network\",type!=\"\"})",
@@ -849,7 +849,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "sum(storage_total{network_name=\"$network\",type!=\"\"})",
@@ -902,7 +902,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "max(num_ds_blocks{network_name=\"$network\"})",
@@ -956,7 +956,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "max(sharding_peers{network_name=\"$network\"})",
@@ -1010,7 +1010,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.0.5",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -1453,7 +1453,7 @@
     }
   ],
   "refresh": "10s",
-  "schemaVersion": 25,
+  "schemaVersion": 26,
   "style": "dark",
   "tags": [
     "zilliqa"
@@ -1464,8 +1464,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "community700alpha6-16sep",
-          "value": "community700alpha6-16sep"
+          "text": "community700beta0-22sep",
+          "value": "community700beta0-22sep"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info, network_name)",
@@ -1507,6 +1507,6 @@
   },
   "timezone": "",
   "title": "Zilliqa / Overview",
-  "uid": "LkPIWMGMk",
-  "version": 5
+  "uid": "zilliqa-overview",
+  "version": 1
 }

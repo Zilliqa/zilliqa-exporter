@@ -3,6 +3,7 @@
 A daemon that exports metrics of Zilliqa node as [Open Metrics](https://github.com/OpenObservability/OpenMetrics) Format
 
 ## Common Labels:
+
 | Name         | Description                                                                                                        |
 | :----------- | :----------------------------------------------------------------------------------------------------------------- |
 | type         | type of node, can auto detect from pod name or zilliqad commandline params. (normal,lookup,newlookup,level2lookup) |
@@ -50,7 +51,8 @@ Only for Lookup, Seed, Seed-apipub(Level2Lookup)
 | network_id               | Network ID of current zilliqa network               | GetNetworkId        | -                 |
 | latest_txblock_timestamp | The timestamp of the latest tx block (milliseconds) | GetLatestTxBlock    | -                 |
 
-Mainnet Only Metrics (scheduled):
+~~Mainnet Only Metrics (scheduled):~~
+
 | Metric           | Description                                    | Method                | Period |
 | :--------------- | :--------------------------------------------- | :-------------------- | :----- |
 | ud_state_size    | State data size of unstoppable domain contract | GetSmartContractState | 1h     |
@@ -66,6 +68,7 @@ Collect info from zilliqa node's Admin API server (Status Server)
 | node_type       | Zilliqa network node type           | GetNodeType | text (representative of node type) |
 
 Only for Shard Node:
+
 | Metric        | Description                                        | Method              | Additional Labels |
 | :------------ | :------------------------------------------------- | :------------------ | :---------------- |
 | shard_id      | Shard ID of the shard of current node              | GetNodeType         | -                 |
@@ -75,7 +78,8 @@ Only for Shard Node:
 | ds_difficulty | The minimum DS difficulty of the previous block    | GetPrevDSDifficulty | -                 |
 
 
-Not implemented:
+Not implemented Yet:
+
 | Metric     | Description | Method       | Additional Labels |
 | :--------- | :---------- | :----------- | :---------------- |
 | node_state | Node state  | GetNodeState | -                 |
@@ -84,10 +88,11 @@ Not implemented:
 
 Get running process information
 
-| Label | Description               |
-| :---- | :------------------------ |
-| pid   | Process ID                |
-| cwd   | Current working directory |
+| Label         | Description               |
+| :------------ | :------------------------ |
+| process_name  | Process Name              |
+| pid           | Process ID                |
+| cwd           | Current working directory |
 
 | Metric                  | Description                                         | unit         | Additional Labels                  |
 | :---------------------- | :-------------------------------------------------- | :----------- | :--------------------------------- |

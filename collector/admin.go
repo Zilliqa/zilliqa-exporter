@@ -120,7 +120,7 @@ func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.adminServerUp, prometheus.GaugeValue, float64(1),
 		append([]string{c.options.AdminEndpoint()}, labels...)...)
 	ch <- prometheus.MustNewConstMetric(c.nodeType, prometheus.GaugeValue, float64(nodeType.Type),
-		append([]string{nodeType.String()}, labels...)...)
+		append([]string{nodeType.Type.String()}, labels...)...)
 
 	if nodeType.Type == adminclient.ShardNode {
 		ch <- prometheus.MustNewConstMetric(c.shardId, prometheus.GaugeValue, float64(nodeType.ShardId), labels...)
