@@ -120,13 +120,14 @@ func (c *Constants) doCollect() {
 
 func (c *Constants) CommonLabels() []string {
 	return []string{
-		"type", "cluster_name", "network_name", "pod_name", "pod_ip", "public_ip", "local_ip",
+		"type", "index",
+		"cluster_name", "network_name", "pod_name", "pod_ip", "public_ip", "local_ip",
 	}
 }
 
 func (c *Constants) CommonLabelValues() []string {
 	return []string{
-		c.NodeType().String(),
+		c.NodeType().String(), strconv.Itoa(c.nodeIndex),
 		c.ClusterName, c.NetworkName, c.PodName, c.PodIP, c.PublicIP, c.LocalIP,
 	}
 }
