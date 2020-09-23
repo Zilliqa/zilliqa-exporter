@@ -8,9 +8,10 @@ spec:
   groups:
   - name: zilliqa-exporter.records
     rules:
+    - record: zilliqa:network:epoch
+      expr: max(epoch) by (cluster_name, network_name)
     - record: zilliqa:epoch:outofsync
       expr: scalar(max(epoch)) - epoch
-
 
   - name: zilliqa-exporter.alerts
     rules:
