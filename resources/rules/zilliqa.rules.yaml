@@ -16,56 +16,56 @@ spec:
     rules:
     - alert: OutOfSync
       annotations:
-        message: '{{ $labels.pod_name }} are {{ $value }} epochs behind the network'
+        message: 'Node {{ $labels.pod_name }} is {{ $value }} epochs behind the network'
       expr: 5 > zilliqa:epoch:outofsync >= 3
       for: 5m
       labels:
         severity: warning
     - alert: OutOfSync
       annotations:
-        message: '{{ $labels.pod_name }} are {{ $value }} epochs behind the network, node maybe stalled'
+        message: 'Node {{ $labels.pod_name }} is {{ $value }} epochs behind the network, node maybe stalled'
       expr: zilliqa:epoch:outofsync > 5
       for: 5m
       labels:
         severity: critical
     - alert: OutOfStorage
       annotations:
-        message: 'storage usage of {{ $labels.pod_name }} reached {{ printf "%.2f" $value }}%'
+        message: 'Storage usage of {{ $labels.pod_name }} reached {{ printf "%.2f" $value }}%'
       expr: storage_used / storage_total * 100 > 75
       for: 5m
       labels:
         severity: warning
     - alert: ApiServerDown
       annotations:
-        message: 'api server of {{ $labels.pod_name }} is not at service'
+        message: 'API server of {{ $labels.pod_name }} is not at service'
       expr: api_server_up == 0
       for: 5m
       labels:
         severity: critical
-    - alert: AdminServerDown
+    - alert: StatusServerDown
       annotations:
-        message: 'admin server of {{ $labels.pod_name }} is not at service'
+        message: 'Status server of {{ $labels.pod_name }} is not at service'
       expr: admin_server_up == 0
       for: 5m
       labels:
         severity: critical
     - alert: NetworkStall
       annotations:
-        message: 'latest Tx block was mined {{ printf "%.2f" $value }} minutes ago, network maybe stalled'
+        message: 'Latest Tx block was mined {{ printf "%.2f" $value }} minutes ago, network maybe stalled'
       expr: (time() - (latest_txblock_timestamp / 1e3)) / 60 > 2
       for: 14m
       labels:
         severity: critical
     - alert: ZilliqaProcessNotRunning
       annotations:
-        message: 'no running zilliqa process found in node {{ $labels.pod_name }}'
+        message: 'No running zilliqa process found in node {{ $labels.pod_name }}'
       expr: zilliqa_process_running == 0
       for: 5m
       labels:
         severity: critical
     - alert: ZilliqaProcessRestarted
       annotations:
-        message: 'zilliqa process of node {{ $labels.pod_name }} restarted recently'
+        message: 'Zilliqa process of node {{ $labels.pod_name }} restarted recently'
       expr: delta(node_uptime[10m]) < 0
       for: 1m
       labels:
@@ -108,7 +108,7 @@ spec:
         severity: warning
     - alert: NodeNotInNetwork
       annotations:
-        message: '{{ $labels.pod_name }} is "{{ $labels.text }}"'
+        message: 'Node {{ $labels.pod_name }} is "{{ $labels.text }}"'
       expr: node_type == 0
       for: 5m
       labels:

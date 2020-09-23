@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 14,
-  "iteration": 1600827118174,
+  "iteration": 1600849313594,
   "links": [],
   "panels": [
     {
@@ -121,6 +121,71 @@
       "type": "stat"
     },
     {
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "noValue": "Error",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 4
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 5,
+        "y": 0
+      },
+      "id": 35,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "zilliqa:epoch:outofsync{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 10,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "OutOfSync",
+      "type": "stat"
+    },
+    {
       "cacheTimeout": null,
       "datasource": null,
       "description": "Uptime  of zilliqa process",
@@ -158,8 +223,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
-        "x": 5,
+        "w": 3,
+        "x": 7,
         "y": 0
       },
       "id": 28,
@@ -254,7 +319,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 9,
+        "x": 10,
         "y": 0
       },
       "id": 6,
@@ -352,7 +417,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 11,
+        "x": 12,
         "y": 0
       },
       "id": 5,
@@ -394,67 +459,6 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "mappings": [],
-          "nullValueMode": "connected",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 13,
-        "y": 0
-      },
-      "id": 35,
-      "interval": null,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Value$/",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "7.1.5",
-      "targets": [
-        {
-          "expr": "count(sum(zilliqa_process_running{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) by (process_name, pid, pod_name)) by (process_name, pod_name) - 1",
-          "format": "table",
-          "instant": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Restarts",
-      "type": "stat"
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
           "mappings": [
             {
               "$$hashKey": "object:1424",
@@ -485,8 +489,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 3,
-        "x": 15,
+        "w": 4,
+        "x": 14,
         "y": 0
       },
       "id": 29,
@@ -636,7 +640,7 @@
         "x": 20,
         "y": 0
       },
-      "id": 23,
+      "id": 36,
       "interval": null,
       "links": [],
       "maxDataPoints": 100,
@@ -888,14 +892,27 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "mappings": [],
+          "mappings": [
+            {
+              "$$hashKey": "object:1424",
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
           "nullValueMode": "connected",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "rgb(255, 255, 255)",
+                "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -909,23 +926,23 @@
         "x": 17,
         "y": 3
       },
-      "id": 25,
+      "id": 22,
       "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
+        "graphMode": "area",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^placement$/",
+          "fields": "/^zilliqa_version$/",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "auto"
       },
       "pluginVersion": "7.1.5",
       "targets": [
@@ -940,7 +957,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Avaliability Zone",
+      "title": "Zilliqa Version",
       "type": "stat"
     },
     {
@@ -1150,80 +1167,6 @@
     {
       "cacheTimeout": null,
       "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [
-            {
-              "$$hashKey": "object:1424",
-              "id": 0,
-              "op": "=",
-              "text": "N/A",
-              "type": 1,
-              "value": "null"
-            }
-          ],
-          "nullValueMode": "connected",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 3,
-        "x": 17,
-        "y": 6
-      },
-      "id": 22,
-      "interval": null,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^zilliqa_version$/",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.1.5",
-      "targets": [
-        {
-          "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
-          "format": "table",
-          "instant": true,
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Zilliqa Version",
-      "type": "stat"
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": null,
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1258,8 +1201,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
-        "x": 20,
+        "w": 3,
+        "x": 17,
         "y": 6
       },
       "id": 33,
@@ -1294,6 +1237,141 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Exporter Version",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [
+            {
+              "$$hashKey": "object:1424",
+              "id": 0,
+              "op": "=",
+              "text": "N/A",
+              "type": 1,
+              "value": "null"
+            }
+          ],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 20,
+        "y": 6
+      },
+      "id": 23,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^instance_type$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Instance Type",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "nullValueMode": "connected",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(255, 255, 255)",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 22,
+        "y": 6
+      },
+      "id": 25,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^placement$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Avaliability Zone",
       "type": "stat"
     },
     {
@@ -1940,9 +2018,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "normal",
-          "value": "normal"
+          "selected": false,
+          "text": "lookup",
+          "value": "lookup"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info{network_name=\"$network\"}, type)",
@@ -1966,9 +2044,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "3",
-          "value": "3"
+          "selected": false,
+          "text": "0",
+          "value": "0"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info{network_name=\"$network\", type=\"$type\"}, pod_name)",
@@ -1992,7 +2070,7 @@
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -2012,5 +2090,5 @@
   "timezone": "",
   "title": "Zilliqa / Node",
   "uid": "zilliqa-node",
-  "version": 5
+  "version": 8
 }
