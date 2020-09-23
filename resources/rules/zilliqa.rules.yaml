@@ -11,7 +11,7 @@ spec:
     - record: zilliqa:network:epoch
       expr: max(epoch) by (cluster_name, network_name)
     - record: zilliqa:epoch:outofsync
-      expr: zilliqa:network:epoch - on(cluster_name, network_name) group_right(pod_name, public_ip) epoch
+      expr: zilliqa:network:epoch - on(cluster_name, network_name) group_right epoch
 
   - name: zilliqa-exporter.alerts
     rules:
@@ -97,20 +97,20 @@ spec:
       annotations:
         message: 'Node {{ $labels.pod_name }} container CPU usage percent of total limit is above {{ printf "%.2f" $value }}%'
       expr: rate(container_cpu_usage_seconds[1m])  * 100 /  container_cpu_cores_limit_equivalence > 75
-      for: 5m
+      for: 10m
       labels:
         severity: warning
     - alert: ContainerMemoryUsageHigh
       annotations:
         message: 'Node {{ $labels.pod_name }} container memory usage percent of total limit is above {{ printf "%.2f" $value }}%'
       expr: container_mem_usage_bytes / container_mem_limit_bytes * 100 > 75
-      for: 5m
+      for: 10m
       labels:
         severity: warning
     - alert: NodeNotInNetwork
       annotations:
         message: 'Node {{ $labels.pod_name }} is "{{ $labels.text }}"'
       expr: node_type == 0
-      for: 5m
+      for: 10m
       labels:
         severity: warning
