@@ -58,35 +58,35 @@ spec:
         severity: critical
     - alert: ZilliqaProcessNotRunning
       annotations:
-        message: 'no running zilliqa process found in this node'
+        message: 'no running zilliqa process found in node {{ $labels.pod_name }}'
       expr: zilliqa_process_running == 0
       for: 5m
       labels:
         severity: critical
     - alert: ZilliqaProcessRestarted
       annotations:
-        message: 'zilliqa process restarted recently'
+        message: 'zilliqa process of node {{ $labels.pod_name }} restarted recently'
       expr: delta(node_uptime[10m]) < 0
       for: 1m
       labels:
         severity: warning
     - alert: ConnectionBurst
       annotations:
-        message: 'TCP connection count burst of zilliqa process detected'
+        message: 'Node {{ $labels.pod_name }} TCP connection count burst of zilliqa process detected'
       expr: delta(connection_count[1m]) > 100
       for: 5m
       labels:
         severity: warning
     - alert: ThreadBurst
       annotations:
-        message: 'Thread count burst of zilliqa process detected'
+        message: 'Node {{ $labels.pod_name }} Thread count burst of zilliqa process detected'
       expr: delta(thread_count[1m]) > 100
       for: 5m
       labels:
         severity: warning
     - alert: FdBurst
       annotations:
-        message: 'File descriptor count burst of zilliqa process detected'
+        message: 'Node {{ $labels.pod_name }} File descriptor count burst of zilliqa process detected'
       expr: delta(fd_count[1m]) > 100
       for: 5m
       labels:
@@ -94,14 +94,14 @@ spec:
     # TODO: add container_name
     - alert: ContainerCPUUsageHigh
       annotations:
-        message: 'Container CPU usage percent of total limit is above {{ printf "%.2f" $value }}%'
+        message: 'Node {{ $labels.pod_name }} container CPU usage percent of total limit is above {{ printf "%.2f" $value }}%'
       expr: rate(container_cpu_usage_seconds[1m])  * 100 /  container_cpu_cores_limit_equivalence > 75
       for: 5m
       labels:
         severity: warning
     - alert: ContainerMemoryUsageHigh
       annotations:
-        message: 'Container memory usage percent of total limit is above {{ printf "%.2f" $value }}%'
+        message: 'Node {{ $labels.pod_name }} container memory usage percent of total limit is above {{ printf "%.2f" $value }}%'
       expr: container_mem_usage_bytes / container_mem_limit_bytes * 100 > 75
       for: 5m
       labels:
