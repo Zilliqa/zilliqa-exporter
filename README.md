@@ -4,15 +4,16 @@ A daemon that exports metrics of Zilliqa node as [Open Metrics](https://github.c
 
 ## Common Labels:
 
-| Name         | Description                                                                                                        |
-| :----------- | :----------------------------------------------------------------------------------------------------------------- |
-| type         | type of node, can auto detect from pod name or zilliqad commandline params. (normal,lookup,newlookup,level2lookup) |
-| pod_name     | node's pod name, from env "POD_NAME" or "Z7A_POD_NAME"                                                             |
-| pod_ip       | IP of the pod, from env "POD_IP", "Z7A_POD_IP"                                                                     |
-| cluster_name | name of genet cluster, from env "CLUSTER_NAME"                                                                     |
-| network_name | name of zilliqa network, from env "Z7A_TESTNET_NAME", "TESTNET_NAME", "NETWORK_NAME"                               |
-| public_ip    | public IP address, from AWS metadata                                                                               |
-| local_ip     | local private IP address, from AWS metadata                                                                        |
+| Name         | Description                                                                                                         |
+| :----------- | :------------------------------------------------------------------------------------------------------------------ |
+| type         | type of node, can auto detect from pod name or zilliqad commandline params. (normal,lookup,newlookup,level2lookup)  |
+| index        | index of node, can auto detect from pod name or zilliqad commandline params. (normal,lookup,newlookup,level2lookup) |
+| pod_name     | node's pod name, from env "POD_NAME" or "Z7A_POD_NAME"                                                              |
+| pod_ip       | IP of the pod, from env "POD_IP", "Z7A_POD_IP"                                                                      |
+| cluster_name | name of genet cluster, from env "CLUSTER_NAME"                                                                      |
+| network_name | name of zilliqa network, from env "Z7A_TESTNET_NAME", "TESTNET_NAME", "NETWORK_NAME"                                |
+| public_ip    | public IP address, from AWS metadata                                                                                |
+| local_ip     | local private IP address, from AWS metadata                                                                         |
 
 
 ## Metrics & Source

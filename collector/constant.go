@@ -4,6 +4,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/zilliqa/zilliqa-exporter/utils"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -43,6 +44,7 @@ type Constants struct {
 	// detected
 	detectStop chan struct{}
 	nodeType   NodeType
+	nodeIndex  int
 	p2pPort    uint32
 }
 
@@ -57,7 +59,7 @@ func NewConstants(options *Options) *Constants {
 			"public_ip", "public_hostname",
 			"local_ip", "local_hostname",
 			"zilliqa_bin_path", "zilliqa_version", // fs related
-			"type", // process related and may change or detected after exporter starts
+			"type", "index", // process related and may change or detected after exporter starts
 		},
 		nil,
 	)
@@ -78,7 +80,7 @@ func (c *Constants) Collect(ch chan<- prometheus.Metric) {
 		c.PublicIP, c.PublicHostname,
 		c.LocalIP, c.LocalHostname,
 		c.BinPath, c.Version,
-		c.NodeType().String(),
+		c.NodeType().String(), strconv.Itoa(c.nodeIndex),
 	)
 }
 
@@ -137,12 +139,17 @@ func (c *Constants) P2PPort() uint32 {
 	return c.p2pPort
 }
 
-func nodeTypeFromPodName(podName string) NodeType {
+func nodeTypeIndexFromPodName(podName string) (NodeType, int) {
 	split := strings.Split(podName, "-") // xxx-TYPE-INDEX (generated pod name of stateful set)
 	if len(split) > 2 {
-		return NodeTypeFromString(split[len(split)-2])
+		nt := NodeTypeFromString(split[len(split)-2])
+		index, err := strconv.Atoi(split[len(split)-1])
+		if err != nil {
+			return nt, -1
+		}
+		return nt, index
 	}
-	return UnknownNodeType
+	return UnknownNodeType, -1
 }
 
 func (c *Constants) doDetectVars() {
@@ -150,9 +157,10 @@ func (c *Constants) doDetectVars() {
 	var p2pPortDetected bool
 
 	if c.PodName != "" {
-		nt := nodeTypeFromPodName(c.PodName)
+		nt, idx := nodeTypeIndexFromPodName(c.PodName)
 		if nt != UnknownNodeType {
 			c.nodeType = nt
+			c.nodeIndex = idx
 			nodeTypeDetected = true
 		}
 	}
@@ -171,6 +179,10 @@ func (c *Constants) doDetectVars() {
 		if nt := GetNodeTypeFromCmdline(cmdline); !nodeTypeDetected && nt != "" {
 			c.nodeType = NodeTypeFromString(nt)
 			nodeTypeDetected = true
+		}
+
+		if idx, err := GetNodeIndexFromCmdline(cmdline); err == nil {
+			c.nodeIndex = idx
 		}
 
 		if p2p, err := GetPortFromCmdline(cmdline); err == nil {
