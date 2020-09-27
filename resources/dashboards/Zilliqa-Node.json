@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 14,
-  "iteration": 1600849313594,
+  "iteration": 1601237327720,
   "links": [],
   "panels": [
     {
@@ -99,7 +99,7 @@
       "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "zilliqa:epoch:outofsync{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
+          "expr": "sum(zilliqa:epoch:outofsync{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) by (pod_name)",
           "instant": false,
           "interval": "",
           "intervalFactor": 10,
@@ -499,7 +499,7 @@
       "maxDataPoints": 100,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "horizontal",
         "reduceOptions": {
@@ -1086,7 +1086,7 @@
       "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "epoch{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
+          "expr": "sum(epoch{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) by (pod_name)",
           "instant": false,
           "interval": "",
           "intervalFactor": 10,
@@ -2090,5 +2090,5 @@
   "timezone": "",
   "title": "Zilliqa / Node",
   "uid": "zilliqa-node",
-  "version": 8
+  "version": 11
 }

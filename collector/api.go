@@ -37,6 +37,7 @@ type APICollector struct {
 	// misc
 	networkID              *prometheus.Desc
 	latestTxBlockTimestamp *prometheus.Desc
+	latestDsBlockTimestamp *prometheus.Desc
 }
 
 func NewAPICollector(constants *Constants) *APICollector {
@@ -94,7 +95,7 @@ func NewAPICollector(constants *Constants) *APICollector {
 		),
 		shardingPeers: prometheus.NewDesc(
 			"sharding_peers", "Peers count of every sharding",
-			append([]string{"index"}, commonLabels...), nil,
+			append([]string{"shard_index"}, commonLabels...), nil,
 		),
 		difficulty: prometheus.NewDesc(
 			"difficulty", "The minimum shard difficulty of the previous block",
@@ -110,6 +111,10 @@ func NewAPICollector(constants *Constants) *APICollector {
 		),
 		latestTxBlockTimestamp: prometheus.NewDesc(
 			"latest_txblock_timestamp", "The timestamp of the latest tx block",
+			commonLabels, nil,
+		),
+		latestDsBlockTimestamp: prometheus.NewDesc(
+			"latest_dsblock_timestamp", "The timestamp of the latest ds block",
 			commonLabels, nil,
 		),
 	}
@@ -228,7 +233,7 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 	}()
 	wg.Add(1)
 	go func() {
-		log.Debug("start GetLatestBlock info")
+		log.Debug("start GetLatestTxBlock info")
 		defer wg.Done()
 		block, err := cli.GetLatestTxBlock()
 		if err != nil {
@@ -236,10 +241,25 @@ func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 		}
 		ts, err := strconv.ParseFloat(block.Header.Timestamp, 64)
 		if err != nil {
-			log.WithError(err).WithField("block", block).Error("fail to parse LatestBlock.Header.Timestamp as number")
+			log.WithError(err).WithField("block", block).Error("fail to parse LatestTxBlock.Header.Timestamp as number")
 		}
 		ch <- prometheus.MustNewConstMetric(c.latestTxBlockTimestamp, prometheus.GaugeValue, ts/1000, labels...)
-		log.Debug("done GetNetworkId")
+		log.Debug("done GetLatestTxBlock")
+	}()
+	wg.Add(1)
+	go func() {
+		log.Debug("start GetLatestDsBlock info")
+		defer wg.Done()
+		block, err := cli.GetLatestDsBlock()
+		if err != nil {
+			log.WithError(err).Error("fail to GetLatestTxBlock")
+		}
+		ts, err := strconv.ParseFloat(block.Header.Timestamp, 64)
+		if err != nil {
+			log.WithError(err).WithField("block", block).Error("fail to parse LatestDsBlock.Header.Timestamp as number")
+		}
+		ch <- prometheus.MustNewConstMetric(c.latestDsBlockTimestamp, prometheus.GaugeValue, ts/1000, labels...)
+		log.Debug("done GetLatestDsBlock")
 	}()
 	wg.Wait()
 	log.Debug("exit api collector")

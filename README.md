@@ -34,23 +34,24 @@ Only collect once when exporter starts.
 Collect info from zilliqa node's JSONRPC API server
 Only for Lookup, Seed, Seed-apipub(Level2Lookup)
 
-| Metric                   | Description                                         | Method              | Additional Labels |
-| :----------------------- | :-------------------------------------------------- | :------------------ | :---------------- |
-| api_server_up            | JsonRPC API server up and running                   | -                   | endpoint          |
-| epoch                    | Current TX block number of the node                 | GetBlockchainInfo   | -                 |
-| ds_epoch                 | Current DS block number of the node                 | GetBlockchainInfo   | -                 |
-| transaction_rate         | Current transaction rate                            | GetBlockchainInfo   | -                 |
-| tx_block_rate            | Current TX block rate                               | GetBlockchainInfo   | -                 |
-| ds_block_rate            | Current DS block rate                               | GetBlockchainInfo   | -                 |
-| num_peers                | Peers count                                         | GetBlockchainInfo   | -                 |
-| sharding_peers           | Peers count of every shard                          | GetBlockchainInfo   | index (of shard)  |
-| num_txns_tx_epoch        | numTxnsTxEpoch                                      | GetBlockchainInfo   | -                 |
-| num_txns_ds_epoch        | numTxnsDSEpoch                                      | GetBlockchainInfo   | -                 |
-| num_transactions         | Transactions count                                  | GetBlockchainInfo   | -                 |
-| difficulty               | The minimum shard difficulty of the previous block  | GetPrevDifficulty   | -                 |
-| ds_difficulty            | The minimum DS difficulty of the previous block     | GetPrevDSDifficulty | -                 |
-| network_id               | Network ID of current zilliqa network               | GetNetworkId        | -                 |
-| latest_txblock_timestamp | The timestamp of the latest tx block (milliseconds) | GetLatestTxBlock    | -                 |
+| Metric                   | Description                                         | Method              | Additional Labels       |
+| :----------------------- | :-------------------------------------------------- | :------------------ | :---------------------- |
+| api_server_up            | JsonRPC API server up and running                   | -                   | endpoint                |
+| epoch                    | Current TX block number of the node                 | GetBlockchainInfo   | -                       |
+| ds_epoch                 | Current DS block number of the node                 | GetBlockchainInfo   | -                       |
+| transaction_rate         | Current transaction rate                            | GetBlockchainInfo   | -                       |
+| tx_block_rate            | Current TX block rate                               | GetBlockchainInfo   | -                       |
+| ds_block_rate            | Current DS block rate                               | GetBlockchainInfo   | -                       |
+| num_peers                | Peers count                                         | GetBlockchainInfo   | -                       |
+| sharding_peers           | Peers count of every shard                          | GetBlockchainInfo   | shard_index (of shard)  |
+| num_txns_tx_epoch        | numTxnsTxEpoch                                      | GetBlockchainInfo   | -                       |
+| num_txns_ds_epoch        | numTxnsDSEpoch                                      | GetBlockchainInfo   | -                       |
+| num_transactions         | Transactions count                                  | GetBlockchainInfo   | -                       |
+| difficulty               | The minimum shard difficulty of the previous block  | GetPrevDifficulty   | -                       |
+| ds_difficulty            | The minimum DS difficulty of the previous block     | GetPrevDSDifficulty | -                       |
+| network_id               | Network ID of current zilliqa network               | GetNetworkId        | -                       |
+| latest_txblock_timestamp | The timestamp of the latest tx block (milliseconds) | GetLatestTxBlock    | -                       |
+| latest_dsblock_timestamp | The timestamp of the latest ds block (milliseconds) | GetLatestDsBlock    | -                       |
 
 ~~Mainnet Only Metrics (scheduled):~~
 

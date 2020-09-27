@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
 	"github.com/zilliqa/zilliqa-exporter/utils"
@@ -54,7 +55,7 @@ func NewConstants(options *Options) *Constants {
 		"node_info",
 		"Node Information of zilliqa and host environment",
 		[]string{
-			"pod_name", "pod_ip", "namespace", "node_name", "network_name", "cluster_name", // network related
+			"pod_name", "short_pod_name", "pod_ip", "namespace", "node_name", "network_name", "cluster_name", // network related
 			"placement", "instance_id", "instance_type", // ec2 instance related
 			"public_ip", "public_hostname",
 			"local_ip", "local_hostname",
@@ -68,6 +69,14 @@ func NewConstants(options *Options) *Constants {
 	return c
 }
 
+func (c *Constants) ShortPodName() string {
+	split := strings.Split(c.PodName, "-") // xxx-TYPE-INDEX (generated pod name of stateful set)
+	if len(split) > 2 {
+		return fmt.Sprintf("%s-%s", split[len(split)-2], split[len(split)-1])
+	}
+	return c.PodName
+}
+
 func (c *Constants) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.NodeInfo
 }
@@ -75,7 +84,7 @@ func (c *Constants) Describe(ch chan<- *prometheus.Desc) {
 func (c *Constants) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(
 		c.NodeInfo, prometheus.GaugeValue, 1,
-		c.PodName, c.PodIP, c.Namespace, c.NodeName, c.NetworkName, c.ClusterName,
+		c.PodName, c.ShortPodName(), c.PodIP, c.Namespace, c.NodeName, c.NetworkName, c.ClusterName,
 		c.Placement, c.InstanceID, c.InstanceType,
 		c.PublicIP, c.PublicHostname,
 		c.LocalIP, c.LocalHostname,

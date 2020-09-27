@@ -20,7 +20,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 15,
-  "iteration": 1600847973724,
+  "iteration": 1601237263134,
   "links": [],
   "panels": [
     {
@@ -150,7 +150,7 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -164,7 +164,7 @@
           "format": "time_series",
           "instant": false,
           "interval": "",
-          "intervalFactor": 10,
+          "intervalFactor": 5,
           "legendFormat": "",
           "refId": "A"
         }
@@ -261,8 +261,8 @@
       "pluginVersion": "6.7.3",
       "showHeader": true,
       "sort": {
-        "col": 0,
-        "desc": true
+        "col": 2,
+        "desc": false
       },
       "styles": [
         {
@@ -284,6 +284,10 @@
             "rgba(50, 172, 45, 0.97)"
           ],
           "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "Jump to Node Dashboard",
+          "linkUrl": "./d/zilliqa-node/zilliqa-node?var-network=${network}&var-type=${__cell_4}&var-index=${__cell_2}",
           "pattern": "pod_name",
           "preserveFormat": false,
           "thresholds": [],
@@ -356,6 +360,7 @@
           ],
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "decimals": 0,
+          "link": false,
           "mappingType": 1,
           "pattern": "Value #B",
           "thresholds": [
@@ -367,7 +372,7 @@
         },
         {
           "$$hashKey": "object:10577",
-          "alias": "CPU Usage",
+          "alias": "CPU",
           "align": "auto",
           "colorMode": "cell",
           "colors": [
@@ -381,15 +386,15 @@
           "mappingType": 1,
           "pattern": "Value #C",
           "thresholds": [
-            "75",
-            "90"
+            ".75",
+            ".90"
           ],
           "type": "number",
           "unit": "percentunit"
         },
         {
           "$$hashKey": "object:11108",
-          "alias": "MEM Usage",
+          "alias": "Memory",
           "align": "auto",
           "colorMode": "cell",
           "colors": [
@@ -402,16 +407,99 @@
           "mappingType": 1,
           "pattern": "Value #D",
           "thresholds": [
-            "75",
-            "90"
+            ".75",
+            ".90"
           ],
           "type": "number",
           "unit": "percentunit"
+        },
+        {
+          "$$hashKey": "object:889",
+          "alias": "Storage",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(50, 172, 45, 0.97)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(245, 54, 54, 0.9)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 1,
+          "mappingType": 1,
+          "pattern": "Value #E",
+          "thresholds": [
+            ".75",
+            ".90"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "$$hashKey": "object:4493",
+          "alias": "Shard ID",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "Value #F",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:28212",
+          "alias": "Index",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 0,
+          "mappingType": 1,
+          "pattern": "index",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:10972",
+          "alias": "",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Value #G",
+          "thresholds": [],
+          "type": "hidden",
+          "unit": "short"
         }
       ],
       "targets": [
         {
-          "expr": "sum(epoch{network_name=\"$network\"}) by (pod_name, type, public_ip)",
+          "expr": "sum(node_info{network_name=\"$network\"}) by (pod_name, type, index, public_ip)",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "G"
+        },
+        {
+          "expr": "sum(epoch{network_name=\"$network\"}) by (pod_name)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -420,12 +508,21 @@
           "refId": "A"
         },
         {
-          "expr": "sum(zilliqa:epoch:outofsync{network_name=\"$network\"}) by (pod_name)",
+          "expr": "sum(max(epoch) by (cluster_name, network_name) - on(cluster_name, network_name) group_right epoch) by (pod_name)",
           "format": "table",
+          "hide": false,
           "instant": true,
           "interval": "",
           "legendFormat": "",
           "refId": "B"
+        },
+        {
+          "expr": "sum(shard_id{network_name=\"$network\"}) by (pod_name)",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "F"
         },
         {
           "expr": "sum(rate(container_cpu_usage_seconds{network_name=\"$network\"}[1m]) / container_cpu_cores_limit_equivalence{network_name=\"$network\"}) by (pod_name)",
@@ -442,6 +539,14 @@
           "interval": "",
           "legendFormat": "",
           "refId": "D"
+        },
+        {
+          "expr": "sum(storage_used{network_name=\"$network\"} / storage_total{network_name=\"$network\"}) by (pod_name)",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "E"
         }
       ],
       "timeFrom": null,
@@ -468,15 +573,19 @@
           "max": 1,
           "min": 0,
           "thresholds": {
-            "mode": "absolute",
+            "mode": "percentage",
             "steps": [
               {
-                "color": "green",
+                "color": "dark-red",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "dark-orange",
                 "value": 80
+              },
+              {
+                "color": "green",
+                "value": 99
               }
             ]
           },
@@ -984,8 +1093,8 @@
       "pageSize": null,
       "showHeader": true,
       "sort": {
-        "col": 4,
-        "desc": true
+        "col": 2,
+        "desc": false
       },
       "styles": [
         {
@@ -1167,6 +1276,15 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "datasource": null,
+        "filters": [],
+        "hide": 0,
+        "label": "",
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
       }
     ]
   },
@@ -1190,5 +1308,5 @@
   "timezone": "",
   "title": "Zilliqa / Overview",
   "uid": "zilliqa-overview",
-  "version": 4
+  "version": 15
 }
