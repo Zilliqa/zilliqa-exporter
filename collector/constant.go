@@ -166,6 +166,9 @@ func (c *Constants) doDetectVars() {
 	var nodeTypeDetected bool
 	var p2pPortDetected bool
 
+	c.nodeType = NodeTypeFromString(utils.GetEnvKeys("NODE_TYPE"))
+	c.nodeIndex, _ = strconv.Atoi(utils.GetEnvKeys("NODE_TYPE"))
+
 	if c.PodName != "" {
 		nt, idx := nodeTypeIndexFromPodName(c.PodName)
 		if nt != UnknownNodeType {

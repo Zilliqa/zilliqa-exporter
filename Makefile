@@ -9,6 +9,8 @@ DIST="./dist"
 BIN_NAME="zilliqa-exporter"
 MODULE_NAME="github.com/zilliqa/zilliqa-exporter"
 
+PER_UTIL_BIN_NAME="persistence-util"
+
 ifdef TAG
 	IMAGE="zilliqa/zilliqa:${TAG}"
 else
@@ -58,7 +60,18 @@ darwin-amd64:
 	mkdir -p ${DIST}
 	GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build ${BUILD_FLAGS} -o ${DIST}/${BIN_NAME}-darwin-amd64 ${MODULE_NAME}
 
-release: clean linux-amd64 darwin-amd64
+persistence-util-local:
+		GO111MODULE="on" go build -v -ldflags '-s -w' -o ${DIST}/${PER_UTIL_BIN_NAME} ${MODULE_NAME}/persistenceutil
+
+persistence-util-linux-amd64:
+		GO111MODULE="on" GOOS=linux GOARCH=amd64 go build -v -ldflags '-s -w' -o ${DIST}/${PER_UTIL_BIN_NAME}-linux-amd64 ${MODULE_NAME}/persistenceutil
+
+persistence-util-darwin-amd64:
+		GO111MODULE="on" GOOS=darwin GOARCH=amd64 go build -v -ldflags '-s -w' -o ${DIST}/${PER_UTIL_BIN_NAME}-darwin-amd64 ${MODULE_NAME}/persistenceutil
+
+persistence-util-release: persistence-util-linux-amd64 persistence-util-darwin-amd64
+
+release: clean linux-amd64 darwin-amd64 persistence-util-release
 	#rm -f ${DIST}/sha256sums.txt
 	cd ${DIST} && sha256sum ./* > sha256sums.txt
 

@@ -11,6 +11,7 @@ const (
 	Normal
 	DSGuard
 	UnknownNodeType
+	Seed
 )
 
 const (
@@ -31,10 +32,12 @@ var stringNodeTypeMap = map[string]NodeType{
 	"normal":       Normal,
 	"dsguard":      DSGuard,
 	"":             UnknownNodeType,
+	"seed":         Seed,
 }
 
 var nodeTypeStringMap = map[NodeType]string{
 	Lookup:          "lookup",
+	Seed:            "seed",
 	SeedPrv:         "seedprv",
 	SeedPub:         "seedpub",
 	Normal:          "normal",
