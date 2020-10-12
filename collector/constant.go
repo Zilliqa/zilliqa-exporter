@@ -170,14 +170,18 @@ func (c *Constants) doDetectVars() {
 		nt := NodeTypeFromString(utils.GetEnvKeys("NODE_TYPE"))
 		if nt != UnknownNodeType {
 			c.nodeType = nt
+			nodeTypeDetected = true
+			log.Debug("got node type from envVar")
 			split := strings.Split(c.PodName, "-")
 			idx, err := strconv.Atoi(split[len(split)-1])
 			if err == nil {
+				log.Debug("got node index from pod name")
 				c.nodeIndex = idx
 			}
 		}
 		idx, err := strconv.Atoi(utils.GetEnvKeys("NODE_INDEX"))
 		if err == nil {
+			log.Debug("got node index from envVar")
 			c.nodeIndex = idx
 		}
 	}
@@ -186,6 +190,7 @@ func (c *Constants) doDetectVars() {
 		if nt != UnknownNodeType {
 			c.nodeType = nt
 			c.nodeIndex = idx
+			log.Debug("got node type and index from pod name")
 			nodeTypeDetected = true
 		}
 	}
@@ -194,8 +199,13 @@ func (c *Constants) doDetectVars() {
 	var err error
 	if pd := GetZilliqadProcess(); pd != nil {
 		cmdline, err = pd.CmdlineSlice()
+		log.Debug("got cmdline from zilliqad process")
 	} else if p := GetZilliqaMainProcess(c); p != nil {
 		cmdline, err = p.CmdlineSlice()
+		log.Debug("got cmdline from zilliqa process")
+	}
+	if cmdline == nil || len(cmdline) == 0 {
+		log.Debug("fail get cmdline")
 	}
 	if err != nil {
 		log.WithError(err).Error("fail to get cmdline")
@@ -203,16 +213,19 @@ func (c *Constants) doDetectVars() {
 	} else {
 		if nt := GetNodeTypeFromCmdline(cmdline); !nodeTypeDetected && nt != "" {
 			c.nodeType = NodeTypeFromString(nt)
+			log.Debug("got node type from cmdline")
 			nodeTypeDetected = true
 		}
 
 		if idx, err := GetNodeIndexFromCmdline(cmdline); err == nil {
 			c.nodeIndex = idx
+			log.Debug("got node index from cmdline")
 		}
 
 		if p2p, err := GetPortFromCmdline(cmdline); err == nil {
 			c.p2pPort = uint32(p2p)
 			p2pPortDetected = true
+			log.Debug("got p2p port from cmdline")
 		}
 	}
 
