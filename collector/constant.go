@@ -166,9 +166,21 @@ func (c *Constants) doDetectVars() {
 	var nodeTypeDetected bool
 	var p2pPortDetected bool
 
-	c.nodeType = NodeTypeFromString(utils.GetEnvKeys("NODE_TYPE"))
-	c.nodeIndex, _ = strconv.Atoi(utils.GetEnvKeys("NODE_TYPE"))
-
+	{
+		nt := NodeTypeFromString(utils.GetEnvKeys("NODE_TYPE"))
+		if nt != UnknownNodeType {
+			c.nodeType = nt
+			split := strings.Split(c.PodName, "-")
+			idx, err := strconv.Atoi(split[len(split)-1])
+			if err == nil {
+				c.nodeIndex = idx
+			}
+		}
+		idx, err := strconv.Atoi(utils.GetEnvKeys("NODE_INDEX"))
+		if err == nil {
+			c.nodeIndex = idx
+		}
+	}
 	if c.PodName != "" {
 		nt, idx := nodeTypeIndexFromPodName(c.PodName)
 		if nt != UnknownNodeType {

@@ -5,13 +5,13 @@ import "strings"
 type NodeType int
 
 const (
-	Lookup NodeType = iota
+	UnknownNodeType NodeType = iota
+	Lookup
+	Seed
 	SeedPub
 	SeedPrv
 	Normal
 	DSGuard
-	UnknownNodeType
-	Seed
 )
 
 const (
@@ -20,8 +20,10 @@ const (
 )
 
 var stringNodeTypeMap = map[string]NodeType{
+	"":             UnknownNodeType,
 	"lookup":       Lookup,
 	"seed-apipub":  SeedPub,
+	"seed":         Seed,
 	"apipub":       SeedPub,
 	"seedpub":      SeedPub,
 	"level2lookup": SeedPub,
@@ -31,18 +33,16 @@ var stringNodeTypeMap = map[string]NodeType{
 	"newlookup":    SeedPrv,
 	"normal":       Normal,
 	"dsguard":      DSGuard,
-	"":             UnknownNodeType,
-	"seed":         Seed,
 }
 
 var nodeTypeStringMap = map[NodeType]string{
+	UnknownNodeType: "",
 	Lookup:          "lookup",
 	Seed:            "seed",
 	SeedPrv:         "seedprv",
 	SeedPub:         "seedpub",
 	Normal:          "normal",
 	DSGuard:         "dsguard",
-	UnknownNodeType: "",
 }
 
 var (
