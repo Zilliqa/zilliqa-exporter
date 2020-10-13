@@ -6,8 +6,7 @@ import (
 	"time"
 )
 
-func CheckTCPPortOpen(addr string) error {
-	timeout := 2500 * time.Millisecond
+func CheckTCPPortOpen(addr string, timeout time.Duration) error {
 	conn, err := net.DialTimeout("tcp", addr, timeout)
 	if err != nil {
 		return errors.Wrap(err, "check tcp port fail")

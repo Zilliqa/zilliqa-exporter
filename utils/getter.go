@@ -38,7 +38,7 @@ func GetHTTPText(url string) string {
 }
 
 func MetadataAvailable() bool {
-	return CheckTCPPortOpen(AWSMetadataIP+":80") == nil
+	return CheckTCPPortOpen(AWSMetadataIP+":80", 100 * time.Millisecond) == nil
 }
 
 func GetMetadata(name string) string {

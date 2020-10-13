@@ -7,9 +7,9 @@ type NodeType int
 const (
 	UnknownNodeType NodeType = iota
 	Lookup
-	Seed
-	SeedPub
-	SeedPrv
+	Seed    // dedicated seeds
+	SeedPub // guard seeds that exposes api to public
+	SeedPrv // guard seeds that exposes api to some specific client
 	Normal
 	DSGuard
 )
@@ -39,15 +39,15 @@ var nodeTypeStringMap = map[NodeType]string{
 	UnknownNodeType: "",
 	Lookup:          "lookup",
 	Seed:            "seed",
-	SeedPrv:         "seedprv",
 	SeedPub:         "seedpub",
+	SeedPrv:         "seedprv",
 	Normal:          "normal",
 	DSGuard:         "dsguard",
 }
 
 var (
-	lookUpTypes = []NodeType{Lookup, SeedPub, SeedPrv}
-	nodeTypes   = []NodeType{Lookup, SeedPub, SeedPrv, Normal, DSGuard}
+	lookUpTypes = []NodeType{Lookup, Seed, SeedPub, SeedPrv}
+	nodeTypes   = []NodeType{Lookup, Seed, SeedPub, SeedPrv, Normal, DSGuard}
 )
 
 func (n NodeType) String() string {

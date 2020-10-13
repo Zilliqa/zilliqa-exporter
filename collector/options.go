@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/zilliqa/zilliqa-exporter/adminclient"
 	"github.com/zilliqa/zilliqa-exporter/utils"
+	"net/url"
 	"os/exec"
 	"strings"
 	"time"
@@ -80,6 +81,18 @@ func (c Options) APIEndpoint() string {
 		return fmt.Sprintf("http://%s", c.apiEndpoint)
 	}
 	return c.apiEndpoint
+}
+
+func (c Options) APIAddr() string {
+	ep := c.APIEndpoint()
+	if ep == "" {
+		return ""
+	}
+	parsed, err := url.Parse(ep)
+	if err != nil {
+		return ""
+	}
+	return parsed.Host
 }
 
 func (c Options) AdminEndpoint() string {

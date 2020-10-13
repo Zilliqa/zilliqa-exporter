@@ -3,8 +3,10 @@ package collector
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+	"github.com/zilliqa/zilliqa-exporter/utils"
 	"strconv"
 	"sync"
+	"time"
 )
 
 // collect instant values
@@ -38,6 +40,8 @@ type APICollector struct {
 	networkID              *prometheus.Desc
 	latestTxBlockTimestamp *prometheus.Desc
 	latestDsBlockTimestamp *prometheus.Desc
+
+	apiServerDetected bool
 }
 
 func NewAPICollector(constants *Constants) *APICollector {
@@ -145,7 +149,13 @@ func (c *APICollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (c *APICollector) Collect(ch chan<- prometheus.Metric) {
 	labels := c.constants.CommonLabelValues()
-	if !IsGeneralLookup(c.constants.NodeType()) {
+	if c.constants.NodeType() == UnknownNodeType {
+		log.WithField("endpoint", c.options.APIAddr()).Debug("node type unknown, try to access API Server")
+		if err := utils.CheckTCPPortOpen(c.options.APIAddr(), 100*time.Millisecond); err != nil {
+			return
+		}
+		log.WithField("endpoint", c.options.APIAddr()).Info("node type unknown, and API Server not detected")
+	} else if !IsGeneralLookup(c.constants.NodeType()) {
 		log.Debug("not a lookup server, skip api server info collection")
 		return
 	}
