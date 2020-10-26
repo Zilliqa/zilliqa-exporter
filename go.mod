@@ -8,6 +8,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/snappy v0.0.2 // indirect
+	github.com/gorilla/mux v1.7.3
 	github.com/joho/godotenv v1.3.0
 	github.com/meatballhat/negroni-logrus v1.1.0
 	github.com/pkg/errors v0.9.1

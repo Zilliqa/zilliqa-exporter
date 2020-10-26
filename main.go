@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/prometheus/client_golang/prometheus"
@@ -12,7 +13,7 @@ import (
 	"github.com/urfave/negroni"
 	"github.com/zilliqa/zilliqa-exporter/collector"
 	"net/http"
-	"net/http/pprof"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -50,8 +51,8 @@ var cmd = &cobra.Command{
 	Use:   filepath.Base(os.Args[0]),
 	Short: "zilliqa metric exporter",
 	Long:  versionOutput(),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return serve(listen)
+	Run: func(cmd *cobra.Command, args []string) {
+		serve(listen)
 	},
 }
 
@@ -86,10 +87,10 @@ func main() {
 
 }
 
-func serve(listen string) error {
+func serve(listen string) {
 	if printVersion {
 		fmt.Println(versionOutput())
-		return nil
+		return
 	}
 
 	constants := collector.NewConstants(options)
@@ -138,19 +139,12 @@ func serve(listen string) error {
 		log.Info("Not collecting info from Zilliqa Process")
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/panic", func(w http.ResponseWriter, req *http.Request) {
+	router := mux.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+	router.HandleFunc("/panic", func(w http.ResponseWriter, req *http.Request) {
 		panic("panic test")
 	})
-	// bind pprof
-	{
-		mux.HandleFunc("/debug/pprof/", pprof.Index)
-		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	}
+	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 
 	n := negroni.New()
 	recovery := &negroni.Recovery{
@@ -162,10 +156,10 @@ func serve(listen string) error {
 	}
 	n.Use(negronilogrus.NewMiddlewareFromLogger(log.StandardLogger(), "req"))
 	n.Use(recovery)
-	n.UseHandler(mux)
+	n.UseHandler(router)
 
 	log.Info("Zilliqa Exporter")
 	log.Info(versionOutput())
 	log.Infof("Beginning to serve on port %s", listen)
-	return http.ListenAndServe(listen, n)
+	n.Run(listen)
 }
