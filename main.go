@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/negroni"
 	"github.com/zilliqa/zilliqa-exporter/collector"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -142,6 +143,15 @@ func serve(listen string) error {
 	mux.HandleFunc("/panic", func(w http.ResponseWriter, req *http.Request) {
 		panic("panic test")
 	})
+	// bind pprof
+	{
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	}
+
 	n := negroni.New()
 	recovery := &negroni.Recovery{
 		Logger:     log.StandardLogger(),

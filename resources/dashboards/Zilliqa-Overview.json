@@ -19,8 +19,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 15,
-  "iteration": 1601237263134,
+  "id": 22,
+  "iteration": 1602575535515,
   "links": [],
   "panels": [
     {
@@ -51,7 +51,7 @@
       "id": 34,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -63,7 +63,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "min(node_uptime{network_name=\"$network\",type!=\"\"})",
@@ -157,7 +157,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "max(epoch{network_name=\"$network\"}) - min(epoch{network_name=\"$network\"})",
@@ -223,7 +223,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "(time() - max(latest_txblock_timestamp / 1e3) by (network_name, cluster_name))",
@@ -612,7 +612,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "count(zilliqa:epoch:outofsync{network_name=\"$network\",type!=\"\"} <= 3) / count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -653,7 +653,7 @@
       "id": 5,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -665,7 +665,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "max(num_tx_blocks{network_name=\"$network\"})",
@@ -707,7 +707,7 @@
       "id": 6,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -719,7 +719,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "max(num_ds_blocks{network_name=\"$network\"})",
@@ -761,7 +761,7 @@
       "id": 9,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -773,7 +773,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "max(sharding_peers{network_name=\"$network\"})",
@@ -815,7 +815,7 @@
       "id": 7,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -827,7 +827,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "count(node_info{network_name=\"$network\",type!=\"\"})",
@@ -896,7 +896,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "max(num_transactions{network_name=\"$network\"})",
@@ -1255,8 +1255,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "community700beta0-22sep",
-          "value": "community700beta0-22sep"
+          "text": "stakingseed",
+          "value": "stakingseed"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info, network_name)",
@@ -1308,5 +1308,5 @@
   "timezone": "",
   "title": "Zilliqa / Overview",
   "uid": "zilliqa-overview",
-  "version": 15
+  "version": 2
 }

@@ -17,8 +17,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 14,
-  "iteration": 1601237327720,
+  "id": 23,
+  "iteration": 1602575409151,
   "links": [],
   "panels": [
     {
@@ -84,7 +84,7 @@
       "id": 31,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -96,7 +96,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "sum(zilliqa:epoch:outofsync{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) by (pod_name)",
@@ -157,7 +157,7 @@
       "id": 35,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -169,7 +169,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "zilliqa:epoch:outofsync{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -245,7 +245,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_uptime{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"} and zilliqa_process_running{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -333,7 +333,7 @@
             "lastNotNull"
           ]
         },
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -345,7 +345,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "admin_server_up{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -426,7 +426,7 @@
       "maxDataPoints": 100,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
@@ -438,7 +438,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "api_server_up{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -511,7 +511,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_type{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -550,10 +550,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -585,7 +581,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "shard_id{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -621,7 +617,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "light-blue",
                 "value": null
               },
               {
@@ -658,7 +654,7 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -732,7 +728,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "storage_used{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"} / storage_total{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -807,7 +803,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "sum(rate(container_cpu_usage_seconds{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}[1m])) / sum(container_cpu_cores_limit_equivalence{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"})",
@@ -869,7 +865,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "sum(container_mem_usage_bytes{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) / sum(container_mem_limit_bytes{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"})",
@@ -907,7 +903,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "light-blue",
                 "value": null
               },
               {
@@ -932,7 +928,7 @@
       "maxDataPoints": 100,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -944,7 +940,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -981,7 +977,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "light-blue",
                 "value": null
               },
               {
@@ -1018,7 +1014,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -1083,7 +1079,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "sum(epoch{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}) by (pod_name)",
@@ -1148,7 +1144,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "ds_epoch{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -1186,7 +1182,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "rgb(255, 255, 255)",
+                "color": "light-blue",
                 "value": null
               },
               {
@@ -1223,7 +1219,7 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "zilliqa_exporter_version_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -1260,7 +1256,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "light-blue",
                 "value": null
               },
               {
@@ -1297,7 +1293,7 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -1325,7 +1321,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "rgb(255, 255, 255)",
+                "color": "light-blue",
                 "value": null
               }
             ]
@@ -1358,7 +1354,7 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "targets": [
         {
           "expr": "node_info{network_name=\"$network\", type=\"$type\", pod_name=~\".*-$index\"}",
@@ -1409,8 +1405,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1512,8 +1511,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1609,8 +1611,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1712,8 +1717,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1821,8 +1829,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1919,8 +1930,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.0",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1993,8 +2007,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "community700beta0-22sep",
-          "value": "community700beta0-22sep"
+          "text": "stakingseed",
+          "value": "stakingseed"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info, network_name)",
@@ -2019,8 +2033,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "lookup",
-          "value": "lookup"
+          "text": "seed",
+          "value": "seed"
         },
         "datasource": "Prometheus",
         "definition": "label_values(node_info{network_name=\"$network\"}, type)",
@@ -2090,5 +2104,5 @@
   "timezone": "",
   "title": "Zilliqa / Node",
   "uid": "zilliqa-node",
-  "version": 11
+  "version": 3
 }
