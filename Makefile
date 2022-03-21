@@ -12,9 +12,9 @@ MODULE_NAME="github.com/zilliqa/zilliqa-exporter"
 PER_UTIL_BIN_NAME="persistence-util"
 
 ifdef TAG
-	IMAGE="zilliqa/zilliqa:${TAG}"
+	IMAGE="zilliqa/exporter:${TAG}"
 else
-	IMAGE="zilliqa/zilliqa:${VERSION}-${COMMIT}"
+	IMAGE="zilliqa/exporter:${VERSION}-${COMMIT}"
 endif
 
 BUILD_FLAGS=-v -ldflags '-s -w \

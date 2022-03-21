@@ -91,11 +91,11 @@ func NewAdminCollector(constants *Constants) *AdminCollector {
 func (c *AdminCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.adminServerUp
 	ch <- c.nodeType
+	ch <- c.epoch
+	ch <- c.dsEpoch
+	ch <- c.difficulty
+	ch <- c.dsDifficulty
 	if !IsGeneralLookup(c.constants.NodeType()) {
-		ch <- c.epoch
-		ch <- c.dsEpoch
-		ch <- c.difficulty
-		ch <- c.dsDifficulty
 		ch <- c.shardId
 		//ch <- c.nodeState
 	}
@@ -126,58 +126,57 @@ func (c *AdminCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(c.shardId, prometheus.GaugeValue, float64(nodeType.ShardId), labels...)
 	}
 
-	if !IsGeneralLookup(c.constants.NodeType()) {
-		reqs := []*jsonrpc.Request{
-			adminclient.NewGetCurrentMiniEpochReq(),
-			adminclient.NewGetCurrentDSEpochReq(),
-			adminclient.NewGetPrevDifficultyReq(),
-			adminclient.NewGetPrevDSDifficultyReq(),
-			//adminclient.NewGetNodeStateReq(),
-		}
-		log.Debug("batch GetCurrentMiniEpoch, GetCurrentDSEpoch, GetPrevDifficulty, GetPrevDSDifficulty, GetNodeState from admin API")
-		resps, err := cli.CallBatch(reqs...)
-		if err != nil {
-			log.WithError(err).Error("error while getting non-lookup infos from admin API")
-		} else if len(resps) != len(reqs) {
-			log.Errorf("unknown error while getting non-lookup infos from admin API, responses less than %d", len(reqs))
-		}
-
-		epoch, err := resps[0].GetFloat64()
-		if err != nil {
-			log.WithError(err).Error("error while getting miniEpoch from admin API")
-		} else {
-			ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch, labels...)
-		}
-
-		dsEpoch, err := resps[1].GetFloat64()
-		if err != nil {
-			log.WithError(err).Error("error while getting dsEpoch from admin API")
-		} else {
-			ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch, labels...)
-		}
-
-		diff, err := resps[2].GetFloat64()
-		if err != nil {
-			log.WithError(err).Error("error while getting prevDifficulty from admin API")
-		} else {
-			ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, diff, labels...)
-		}
-
-		dsDiff, err := resps[3].GetFloat64()
-		if err != nil {
-			log.WithError(err).Error("error while getting prevDSDifficulty from admin API")
-		} else {
-			ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, dsDiff, labels...)
-		}
-
-		// TODO: node state
-		//var state adminclient.NodeState
-		//err = resps[4].GetObject(&state)
-		//if err != nil {
-		//	log.WithError(err).Error("error while getting nodeState from admin API")
-		//} else {
-		//	ch <- prometheus.MustNewConstMetric(c.nodeState, prometheus.GaugeValue, float64(state), state.String(), labels...)
-		//}
+	reqs := []*jsonrpc.Request{
+		adminclient.NewGetCurrentMiniEpochReq(),
+		adminclient.NewGetCurrentDSEpochReq(),
+		adminclient.NewGetPrevDifficultyReq(),
+		adminclient.NewGetPrevDSDifficultyReq(),
+		//adminclient.NewGetNodeStateReq(),
 	}
+
+	log.Debug("batch GetCurrentMiniEpoch, GetCurrentDSEpoch, GetPrevDifficulty, GetPrevDSDifficulty, GetNodeState from admin API")
+	resps, err := cli.CallBatch(reqs...)
+	if err != nil {
+		log.WithError(err).Error("error while getting non-lookup infos from admin API")
+	} else if len(resps) != len(reqs) {
+		log.Errorf("unknown error while getting non-lookup infos from admin API, responses less than %d", len(reqs))
+	}
+
+	epoch, err := resps[0].GetFloat64()
+	if err != nil {
+		log.WithError(err).Error("error while getting miniEpoch from admin API")
+	} else {
+		ch <- prometheus.MustNewConstMetric(c.epoch, prometheus.GaugeValue, epoch, labels...)
+	}
+
+	dsEpoch, err := resps[1].GetFloat64()
+	if err != nil {
+		log.WithError(err).Error("error while getting dsEpoch from admin API")
+	} else {
+		ch <- prometheus.MustNewConstMetric(c.dsEpoch, prometheus.GaugeValue, dsEpoch, labels...)
+	}
+
+	diff, err := resps[2].GetFloat64()
+	if err != nil {
+		log.WithError(err).Error("error while getting prevDifficulty from admin API")
+	} else {
+		ch <- prometheus.MustNewConstMetric(c.difficulty, prometheus.GaugeValue, diff, labels...)
+	}
+
+	dsDiff, err := resps[3].GetFloat64()
+	if err != nil {
+		log.WithError(err).Error("error while getting prevDSDifficulty from admin API")
+	} else {
+		ch <- prometheus.MustNewConstMetric(c.dsDifficulty, prometheus.GaugeValue, dsDiff, labels...)
+	}
+
+	// TODO: node state
+	//var state adminclient.NodeState
+	//err = resps[4].GetObject(&state)
+	//if err != nil {
+	//	log.WithError(err).Error("error while getting nodeState from admin API")
+	//} else {
+	//	ch <- prometheus.MustNewConstMetric(c.nodeState, prometheus.GaugeValue, float64(state), state.String(), labels...)
+	//}
 	log.Debug("exit admin collector")
 }
